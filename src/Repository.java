@@ -17,7 +17,10 @@ public class Repository {
 
     public List<Customer> getCustomers() {
 
-        String query = "SELECT id, firstName, lastName, sscr FROM customer";
+        String query = "SELECT Customer.id, Customer.firstName, Customer.lastName, Customer.sscr, LoginDetails.username, LoginDetails.userPassword " +
+                "FROM Customer " +
+                "inner join LoginDetails " +
+                "on LoginDetails.customerId = Customer.id";
         List<Customer> customers = new ArrayList<Customer>();
 
         try (Connection connection = DriverManager.getConnection(properties.getProperty("connectionString"), properties.getProperty("username"), properties.getProperty("password"))) {
@@ -28,7 +31,9 @@ public class Repository {
                 String firstName = resultSet.getString("firstName");
                 String lastName = resultSet.getString("lastName");
                 long sscr = resultSet.getLong("sscr");
-                Customer customer = new Customer(id, firstName, lastName, sscr);
+                String username = resultSet.getString("username");
+                String password = resultSet.getString("userPassword");
+                Customer customer = new Customer(id, firstName, lastName, sscr, new LoginDetails(username, password));
                 customers.add(customer);
             }
 
@@ -37,9 +42,9 @@ public class Repository {
         catch (SQLException e) {
             e.printStackTrace();
         }
-
         return customers;
     }
+
 }
 
 

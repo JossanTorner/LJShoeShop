@@ -1,15 +1,17 @@
 public class Customer {
 
-    int id;
-    String firstName;
-    String lastName;
-    long sscr;
+    private int id;
+    private String firstName;
+    private String lastName;
+    private long sscr;
+    LoginDetails loginDetails;
 
-    public Customer(int id, String firstName, String lastName, long sscr) {
+    public Customer(int id, String firstName, String lastName, long sscr, LoginDetails loginDetails) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.sscr = sscr;
+        this.loginDetails = loginDetails;
     }
 
     public int getId() {
@@ -42,5 +44,13 @@ public class Customer {
 
     public void setSscr(long sscr) {
         this.sscr = sscr;
+    }
+
+    public LoginDetails getLoginDetails() {
+        return loginDetails;
+    }
+
+    public void setLoginDetails(LoginDetails loginDetails) {
+        this.loginDetails = loginDetails;
     }
 }
