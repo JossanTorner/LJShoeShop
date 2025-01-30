@@ -67,7 +67,7 @@ public class Repository {
         Customer loggedInCustomer = login(username, password);
 
         if (loggedInCustomer != null) {
-            System.out.println("Successful login!" + "n\" Welcome " +
+            System.out.println("Successful login!" + " Welcome " +
                     loggedInCustomer.getFirstName() + " " +
                     loggedInCustomer.getLastName());
             getCategories();
@@ -94,9 +94,7 @@ public class Repository {
                 String categoryname = resultSet.getString("categoryName");
                 Category category = new Category(categoryname, id);
                 categories.add(category);
-
             }
-
             CreateCategory(categories);
 
         } catch (SQLException e) {
