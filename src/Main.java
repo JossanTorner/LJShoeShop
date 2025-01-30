@@ -11,6 +11,7 @@ public class Main {
 
             Repository.Repository rep = new Repository.Repository();
             rep.validateLogIn();
+            rep.getProducts();
             // Main main = new Main();
 
         }
