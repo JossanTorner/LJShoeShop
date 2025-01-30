@@ -32,4 +32,8 @@ public class ShoppingCart {
         this.id = id;
     }
 
+    public int getId() {
+        return id;
+    }
+
 }

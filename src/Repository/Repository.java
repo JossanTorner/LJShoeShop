@@ -19,10 +19,10 @@ public class Repository {
     private Properties properties = new Properties();
 
     public Repository() throws IOException {
-
         properties.load(new FileInputStream("src/settings_logIn.properties"));
     }
 
+    //hämtar customer som loggar in från databasen
     public Customer login(String username, String password) {
         String query = "SELECT Customer.id, Customer.firstName, Customer.lastName, Customer.sscr, " +
                 "LoginDetails.username, LoginDetails.userPassword " +
@@ -59,24 +59,7 @@ public class Repository {
         }
     }
 
-    public void validateLogIn() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Användarnamn: ");
-        String username = scanner.nextLine();
-        System.out.print("Lösenord: ");
-        String password = scanner.nextLine();
-        Customer loggedInCustomer = login(username, password);
-
-        if (loggedInCustomer != null) {
-            System.out.println("Successful login!" + " Welcome " +
-                    loggedInCustomer.getFirstName() + " " +
-                    loggedInCustomer.getLastName());
-
-        } else {
-            System.out.println("Invalid username or password");
-        }
-    }
-
+    //laddar programmet med kategorier från databasen
     public List<Category> getCategories() {
         List<Category> categories = new ArrayList<>();
 
@@ -97,8 +80,7 @@ public class Repository {
                 Category category = new Category(categoryName, id);
                 categories.add(category);
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Invalid connection to database while collection categories", e);
         }
@@ -106,15 +88,16 @@ public class Repository {
     }
 
 
-    public List<Product> getProducts(List<Category> categories){
+    //returnerar en lista med alla produkter + lägger in dem i tillhörande kategorier
+    public List<Product> getProducts(List<Category> categories) {
         List<Product> products = new ArrayList<>();
 
         String query = "SELECT Product.id as productId, Product.productName, Specification.price, Specification.shoeSize, Specification.color, Specification.brand, Category.id as categoryId" +
-        " from Product" +
-        " inner join Specification on Specification.id = Product.specId" +
-        " inner join ProductInCategory on ProductInCategory.productId = Product.id" +
-        " inner join Category on Category.id = ProductInCategory.categoryId" +
-        " where Category.id = ProductInCategory.categoryId";
+                " from Product" +
+                " inner join Specification on Specification.id = Product.specId" +
+                " inner join ProductInCategory on ProductInCategory.productId = Product.id" +
+                " inner join Category on Category.id = ProductInCategory.categoryId" +
+                " where Category.id = ProductInCategory.categoryId";
 
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
@@ -135,7 +118,7 @@ public class Repository {
                 Product product = new Product(productId, productName, new Specification(price, shoeSize, color, brand));
                 products.add(product);
 
-                for(Category category : categories){
+                for (Category category : categories) {
                     if (category.getCategoryID() == categoryId) {
                         category.addProductToCategory(product);
                     }
@@ -149,22 +132,44 @@ public class Repository {
         return products;
     }
 
-    public void getOrderHistory(Customer customer){
+    //laddar en shoppingcart med produkter som ligger i den i databasen
+    public List<CartItem> loadShoppingCart(ShoppingCart cart, List<Product> products) {
+        List<CartItem> items = new ArrayList<>();
+        String query = "SELECT CartItem.productId, cartItem.quantity FROM CartItem where CartItem.cartId = ?";
 
+        try (Connection connection = DriverManager.getConnection(
+                properties.getProperty("connectionString"),
+                properties.getProperty("username"),
+                properties.getProperty("password"))) {
+
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, cart.getId());
+
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                int productId = resultSet.getInt("productId");
+                int quantity = resultSet.getInt("quantity");
+
+                for (Product product : products) {
+                    if (product.getId() == productId) {
+                        CartItem item = new CartItem(product);
+                        item.setQuantity(quantity);
+                        items.add(item);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return items;
     }
 
-    public void getOrderDetails(){
-
-    }
-
-    public ShoppingCart getShoppingCart(Customer customer, List<Product> products){
-
+    //hämtar shoppingcart tillhörande customer
+    public ShoppingCart getShoppingCart(Customer customer) {
         ShoppingCart shoppingCart = new ShoppingCart();
-        String query = "SELECT ShoppingCart.id as shoppingsCartId shoppingCartId, CartItem.productId, CartItem.quantity" +
-                "from ShoppingCart" +
-                "inner join CartItem on CartItem.cartId = ShoppingCart.id" +
-                "inner join Customer on Customer.id = ShoppingCart.customerId" +
-                " where ShoppingCart.customerId = ?";
+        String query = "SELECT * FROM ShoppingCart WHERE ShoppingCart.customerId = ?";
 
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
@@ -177,39 +182,41 @@ public class Repository {
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                int shoppingCartId = resultSet.getInt("shoppingsCartId");
-                int productId = resultSet.getInt("productId");
-                int quantity = resultSet.getInt("quantity");
-
+                int shoppingCartId = resultSet.getInt("id");
+                System.out.println("ShoppingcartId in rep: " + shoppingCartId);
                 shoppingCart.setId(shoppingCartId);
-
-                for(Product product : products){
-                    if(product.getId() == productId){
-                        CartItem item = new CartItem(product);
-                        item.setQuantity(quantity);
-                        shoppingCart.addToCart(item);
-                    }
-                }
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return shoppingCart;
     }
+
+    public void getOrderHistory(Customer customer) {
+
+    }
+
+    public void getOrderDetails() {
+
+    }
+
 }
 
-//  public void CreateCategory(List<Category> categories) {
+
+//    public void validateLogIn() {
 //        Scanner scanner = new Scanner(System.in);
-//        System.out.println("Choose a category: ");
-//        for(Category category : categories) {
-//            System.out.println(category.getCategoryID() + " " + category.getCategoryName());
-//        }
-//        int input = scanner.nextInt();
-//        for (Category categoryFound : categories) {
-//            if (categoryFound.equals(input)) {
-//                System.out.println("Category" + categoryFound.getCategoryName());
-//            }
+//        System.out.print("Användarnamn: ");
+//        String username = scanner.nextLine();
+//        System.out.print("Lösenord: ");
+//        String password = scanner.nextLine();
+//        Customer loggedInCustomer = login(username, password);
+//
+//        if (loggedInCustomer != null) {
+//            System.out.println("Successful login!" + " Welcome " +
+//                    loggedInCustomer.getFirstName() + " " +
+//                    loggedInCustomer.getLastName());
+//
+//        } else {
+//            System.out.println("Invalid username or password");
 //        }
 //    }
-

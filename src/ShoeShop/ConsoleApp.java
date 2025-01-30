@@ -134,9 +134,10 @@ public class ConsoleApp {
     }
 
     public void showShoppingCart(){
-        repository.getShoppingCart(loggedInCustomer, LJProducts);
-        for(CartItem item : loggedInCustomer.getShoppingCart().getItemsInCart()){
-            System.out.println(item.getProduct().getProductName() + ", " + item.getQuantity());
+        loggedInCustomer.setShoppingCart(repository.getShoppingCart(loggedInCustomer));
+        loggedInCustomer.getShoppingCart().setItemsInCart(repository.loadShoppingCart(loggedInCustomer.getShoppingCart(), LJProducts));
+        for(CartItem item: loggedInCustomer.getShoppingCart().getItemsInCart()){
+            System.out.println(item.getProduct().getProductName() + " - Quantity: " + item.getQuantity());
         }
     }
 
@@ -153,63 +154,14 @@ public class ConsoleApp {
         }
     }
 
-
-    public void handleCategoryInput(String userInput) {
-        boolean found = false;
-        Product selectedProduct = null;
-
-        System.out.println("Products: ");
-        for (Category category : LJcategories) {
-            if (category.getCategoryName().equals(userInput)) {
-                for (int i = 0; i < category.getProductsInCategory().size(); i++) {
-                    Product product = category.getProductsInCategory().get(i);
-                    System.out.println((i + 1) + " -> " + product.getProductName() +
-                            "\n" + product.getSpec().getBrand() +
-                            "\n" + product.getSpec().getColor() +
-                            "\n" + product.getSpec().getSize() +
-                            "\n" + product.getSpec().getPrice());
-                }
-                //System.out.println(category.getProductsInCategory().stream().map(Product::getProductName).toList());
-                found = true;
-            }
-            if (!found) {
-                System.out.println("Invalid input");
-                return;
-            }
-        }
-        System.out.println("Make your choice...");
-
-        int choice;
-        try {
-            choice = Integer.parseInt(input.nextLine());
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid choice. Please enter a number.");
-            return;
-        }
-
-        // Find the selected product
-        for (Category category : LJcategories) {
-            if (category.getCategoryName().equals(input)) {
-                if (choice > 0 && choice <= category.getProductsInCategory().size()) {
-                    selectedProduct = category.getProductsInCategory().get(choice - 1);
-                } else {
-                    System.out.println("Invalid selection.");
-                    return;
-                }
-            }
-        }
-
-//        if (selectedProduct != null) {
-//            addProductToCart(selectedProduct);
-//        }
-    }
-
+    //denna method behöver anropa SP
     public void addProductToCart(String input){
 
     }
 
     public void validateLogIn(String username, String password){
         loggedInCustomer = repository.login(username, password);
+        System.out.println("Customer id: " + loggedInCustomer.getId());
         if (loggedInCustomer == null){
             System.out.println("Invalid username or password");
         }
@@ -234,5 +186,54 @@ public class ConsoleApp {
     }
 
 
+//    public void handleCategoryInput(String userInput) {
+//        boolean found = false;
+//        Product selectedProduct = null;
+//
+//        System.out.println("Products: ");
+//        for (Category category : LJcategories) {
+//            if (category.getCategoryName().equals(userInput)) {
+//                for (int i = 0; i < category.getProductsInCategory().size(); i++) {
+//                    Product product = category.getProductsInCategory().get(i);
+//                    System.out.println((i + 1) + " -> " + product.getProductName() +
+//                            "\n" + product.getSpec().getBrand() +
+//                            "\n" + product.getSpec().getColor() +
+//                            "\n" + product.getSpec().getSize() +
+//                            "\n" + product.getSpec().getPrice());
+//                }
+//                //System.out.println(category.getProductsInCategory().stream().map(Product::getProductName).toList());
+//                found = true;
+//            }
+//            if (!found) {
+//                System.out.println("Invalid input");
+//                return;
+//            }
+//        }
+//        System.out.println("Make your choice...");
+//
+//        int choice;
+//        try {
+//            choice = Integer.parseInt(input.nextLine());
+//        } catch (NumberFormatException e) {
+//            System.out.println("Invalid choice. Please enter a number.");
+//            return;
+//        }
+//
+//        // Find the selected product
+//        for (Category category : LJcategories) {
+//            if (category.getCategoryName().equals(input)) {
+//                if (choice > 0 && choice <= category.getProductsInCategory().size()) {
+//                    selectedProduct = category.getProductsInCategory().get(choice - 1);
+//                } else {
+//                    System.out.println("Invalid selection.");
+//                    return;
+//                }
+//            }
+//        }
+//
+//        if (selectedProduct != null) {
+//            addProductToCart(selectedProduct);
+//        }
+//    }
 
 }
