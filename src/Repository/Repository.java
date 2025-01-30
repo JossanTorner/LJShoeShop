@@ -6,6 +6,7 @@ import ShoeShop.Product;
 import ShoeShop.Specification;
 import ShoeShop.Category;
 import ShoeShop.Product;
+import com.mysql.cj.x.protobuf.MysqlxCrud;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -148,42 +149,26 @@ public class Repository {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Databasfel vid inloggning", e);
+            throw new RuntimeException("Databasfel vid inläsning av produkter", e);
         }
         return products;
     }
+
+    public void getOrderHistory(Customer customer){
+
+    }
+
+    public void getOrderDetails(){
+
+    }
+
+    public void getShoppingCart(){
+
+    }
+
+    public void addToShoppingCart(Product product){
+
+    }
 }
-
-
-
-//    public List<Customer> getCustomers() {
-//
-//        String query = "SELECT Customer.id, Customer.firstName, Customer.lastName, Customer.sscr, LoginDetails.username, LoginDetails.userPassword " +
-//                "FROM Customer " +
-//                "inner join LoginDetails " +
-//                "on LoginDetails.customerId = Customer.id";
-//        List<Customer> customers = new ArrayList<Customer>();
-//
-//        try (Connection connection = DriverManager.getConnection(properties.getProperty("connectionString"), properties.getProperty("username"), properties.getProperty("password"))) {
-//            Statement statement = connection.createStatement();
-//            ResultSet resultSet = statement.executeQuery(query);
-//            while (resultSet.next()) {
-//                int id = resultSet.getInt("id");
-//                String firstName = resultSet.getString("firstName");
-//                String lastName = resultSet.getString("lastName");
-//                long sscr = resultSet.getLong("sscr");
-//                String username = resultSet.getString("username");
-//                String password = resultSet.getString("userPassword");
-//                Customer customer = new Customer(id, firstName, lastName, sscr, new LoginDetails(username, password));
-//                customers.add(customer);
-//            }
-//
-//            statement.close();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        return customers;
-//    }
-
 
 
