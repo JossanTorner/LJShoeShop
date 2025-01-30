@@ -6,6 +6,5 @@ public class Main {
 
         Repository rep = new Repository();
         System.out.println(rep.getCustomers().stream().map(Customer::getFirstName).toList());
-
     }
 }

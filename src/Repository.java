@@ -17,7 +17,7 @@ public class Repository {
 
     public List<Customer> getCustomers() {
 
-        String query = "SELECT id, firstName, lastName, sscr FROM customer";
+        String query = "SELECT id, firstName, lastName, sscr FROM Customer";
         List<Customer> customers = new ArrayList<Customer>();
 
         try (Connection connection = DriverManager.getConnection(properties.getProperty("connectionString"), properties.getProperty("username"), properties.getProperty("password"))) {
