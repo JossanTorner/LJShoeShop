@@ -77,13 +77,46 @@ public class ConsoleApp {
     }
 
     public void categoriesPrompt() {
-        System.out.println("Choose a category: ");
         Category chosenCategory = null;
+        int categoryChoice;
+
+        System.out.println("Choose a category: ");
         int count = 1;
         for(int i = 0; i < LJcategories.size(); i++){
             System.out.println(count++ + " -> " + LJcategories.get(i).getCategoryName());
         }
-        handleCategoryInput(input.nextLine());
+
+        try{
+            categoryChoice = Integer.parseInt(input.nextLine());
+        }
+        catch (Exception e){
+            return;
+        }
+
+        for(int i = 0; i < LJcategories.size(); i++){
+            if (categoryChoice > 0 && categoryChoice <= LJcategories.size()) {
+                chosenCategory = LJcategories.get(categoryChoice - 1);
+                break;
+            }
+        }
+        handleCategoryChoice(chosenCategory);
+    }
+
+    public void handleCategoryChoice(Category chosenCategory){
+        boolean found = false;
+        Product selectedProduct = null;
+        for(Category category:LJcategories){
+            if(category.getCategoryName().equals(chosenCategory.getCategoryName())){
+                for (int i = 0; i < category.getProductsInCategory().size(); i++) {
+                    Product product = category.getProductsInCategory().get(i);
+                    System.out.println((i + 1) + " -> " + product.getProductName() +
+                            "\n" + product.getSpec().getBrand() +
+                            "\n" + product.getSpec().getColor() +
+                            "\n" + product.getSpec().getSize() +
+                            "\n" + product.getSpec().getPrice());
+                }
+            }
+        }
     }
 
 
@@ -132,9 +165,9 @@ public class ConsoleApp {
             }
         }
 
-        if (selectedProduct != null) {
-            addProductToCart(selectedProduct);
-        }
+//        if (selectedProduct != null) {
+//            addProductToCart(selectedProduct);
+//        }
     }
 
     public void addProductToCart(String input){
