@@ -1,5 +1,6 @@
 package ShoeShop;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Category {
@@ -12,6 +13,7 @@ public class Category {
     public Category(String categoryName, int categoryID) {
         this.categoryName = categoryName;
         this.categoryID = categoryID;
+        productsInCategory = new ArrayList<Product>();
     }
 
     public String getCategoryName() {
@@ -37,4 +39,9 @@ public class Category {
     public void setProductsInCategory(List<Product> productsInCategory) {
         this.productsInCategory = productsInCategory;
     }
+
+    public void addProductToCategory(Product product) {
+        productsInCategory.add(product);
+    }
+
 }

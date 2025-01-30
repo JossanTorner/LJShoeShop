@@ -4,11 +4,15 @@ import Customer.Customer;
 import Repository.Repository;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class ConsoleApp {
 
-    Scanner scanner = new Scanner(System.in);
+    List<Category> LJcategories;
+    List<Product> LJProducts;
+    Scanner input = new Scanner(System.in);
     boolean running = true;
     UserState currentState = UserState.LOGIN;
     Repository repository;
@@ -16,6 +20,9 @@ public class ConsoleApp {
 
     public ConsoleApp() throws IOException {
         repository = new Repository();
+        LJcategories = repository.getCategories();
+        System.out.println(LJcategories.stream().map(Category::getCategoryName).toList());
+        LJProducts = repository.getProducts(LJcategories);
     }
 
     public void run(){
@@ -30,9 +37,9 @@ public class ConsoleApp {
     public void logInPrompt(){
         System.out.println("LOG IN");
         System.out.println("Username: ");
-        String username = scanner.nextLine();
+        String username = input.nextLine();
         System.out.println("Password: ");
-        String password = scanner.nextLine();
+        String password = input.nextLine();
         validateLogIn(username, password);
     }
 
@@ -45,13 +52,13 @@ public class ConsoleApp {
                 "\n[4] Log out" +
                 "\n[5] Exit");
         System.out.println("Menu choice: ");
-        handleMenuInput(scanner.nextLine());
+        handleMenuInput(input.nextLine());
     }
 
     public void handleMenuInput(String input){
         switch(input){
             case "1" -> {
-                categoryPrompt();
+                categoriesPrompt();
             }
             case "2" ->{
                 //visa order history
@@ -69,48 +76,69 @@ public class ConsoleApp {
         }
     }
 
-    public void categoryPrompt(){
-        System.out.println("CATEGORIES");
-        System.out.println(
-                "[1] Sneakers" +
-                "\n[2] Boots" +
-                "\n[3] Sandals" +
-                "\n[4] Slip-in's" +
-                "\n[5] Heels" +
-                "\n[6] Flip flops" +
-                "\n[7] Back to menu");
-        System.out.println("Menu choice: ");
-        handleCategoryInput(scanner.nextLine());
+    public void categoriesPrompt() {
+        System.out.println("Choose a category: ");
+        Category chosenCategory = null;
+        int count = 1;
+        for(int i = 0; i < LJcategories.size(); i++){
+            System.out.println(count++ + " -> " + LJcategories.get(i).getCategoryName());
+        }
+        handleCategoryInput(input.nextLine());
     }
 
 
-    public void handleCategoryInput(String input){
-        switch(input){
-            case "1" -> {
-                //visa sneakers
+    public void handleCategoryInput(String userInput) {
+        boolean found = false;
+        Product selectedProduct = null;
+
+        System.out.println("Products: ");
+        for (Category category : LJcategories) {
+            if (category.getCategoryName().equals(userInput)) {
+                for (int i = 0; i < category.getProductsInCategory().size(); i++) {
+                    Product product = category.getProductsInCategory().get(i);
+                    System.out.println((i + 1) + " -> " + product.getProductName() +
+                            "\n" + product.getSpec().getBrand() +
+                            "\n" + product.getSpec().getColor() +
+                            "\n" + product.getSpec().getSize() +
+                            "\n" + product.getSpec().getPrice());
+                }
+                //System.out.println(category.getProductsInCategory().stream().map(Product::getProductName).toList());
+                found = true;
             }
-            case "2" -> {
-                //visa boots
-            }
-            case "3" ->{
-                //visa sandaler
-            }
-            case "4" -> {
-                //visa slip ins
-            }
-            case "5" -> {
-                //visa klackskor
-            }
-            case "6" ->{
-                //visa flip flops
-            }
-            case "7" -> {
-                currentState = UserState.MAIN_MENU;
-            }
-            default -> {
+            if (!found) {
                 System.out.println("Invalid input");
+                return;
             }
         }
+        System.out.println("Make your choice...");
+
+        int choice;
+        try {
+            choice = Integer.parseInt(input.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid choice. Please enter a number.");
+            return;
+        }
+
+        // Find the selected product
+        for (Category category : LJcategories) {
+            if (category.getCategoryName().equals(input)) {
+                if (choice > 0 && choice <= category.getProductsInCategory().size()) {
+                    selectedProduct = category.getProductsInCategory().get(choice - 1);
+                } else {
+                    System.out.println("Invalid selection.");
+                    return;
+                }
+            }
+        }
+
+        if (selectedProduct != null) {
+            addProductToCart(selectedProduct);
+        }
+    }
+
+    public void addProductToCart(String input){
+
     }
 
     public void validateLogIn(String username, String password){

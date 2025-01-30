@@ -81,7 +81,8 @@ public class Repository {
 
     public List<Category> getCategories() {
         List<Category> categories = new ArrayList<>();
-        String query = "SELECT * FROM Category ";
+
+        String query = "SELECT * FROM Category";
 
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
@@ -93,41 +94,29 @@ public class Repository {
 
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
-                String categoryname = resultSet.getString("categoryName");
-                Category category = new Category(categoryname, id);
+                String categoryName = resultSet.getString("categoryName");
+
+                Category category = new Category(categoryName, id);
                 categories.add(category);
             }
-            CreateCategory(categories);
-
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Invalid connection to database while collection categories", e);
         }
-
         return categories;
     }
 
-    public void CreateCategory(List<Category> categories) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Choose a category: ");
-        for(Category category : categories) {
-            System.out.println(category.getCategoryID() + " " + category.getCategoryName());
-        }
-        int input = scanner.nextInt();
-        for (Category categoryFound : categories) {
-            if (categoryFound.equals(input)) {
-                System.out.println("Category" + categoryFound.getCategoryName());
-            }
-        }
-    }
 
-    public List<Product> getProducts(){
+    public List<Product> getProducts(List<Category> categories){
         List<Product> products = new ArrayList<>();
 
-        String query = "SELECT Product.id, Product.productName, Specification.price, Specification.shoeSize, Specification.color, Specification.brand " +
-                "from Product " +
-                "inner join " +
-                "Specification on Specification.id = Product.specId";
+        String query = "SELECT Product.id as productId, Product.productName, Specification.price, Specification.shoeSize, Specification.color, Specification.brand, Category.id as categoryId" +
+        " from Product" +
+        " inner join Specification on Specification.id = Product.specId" +
+        " inner join ProductInCategory on ProductInCategory.productId = Product.id" +
+        " inner join Category on Category.id = ProductInCategory.categoryId" +
+        " where Category.id = ProductInCategory.categoryId";
 
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
@@ -138,13 +127,21 @@ public class Repository {
             ResultSet resultSet = statement.executeQuery(query);
 
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
+                int productId = resultSet.getInt("productId");
                 String productName = resultSet.getString("productName");
                 double price = resultSet.getDouble("price");
                 int shoeSize = resultSet.getInt("shoeSize");
                 String color = resultSet.getString("color");
                 String brand = resultSet.getString("brand");
-                products.add(new Product(id, productName, new Specification(price, shoeSize, color, brand)));
+                int categoryId = resultSet.getInt("categoryId");
+                Product product = new Product(productId, productName, new Specification(price, shoeSize, color, brand));
+                products.add(product);
+
+                for(Category category : categories){
+                    if (category.getCategoryID() == categoryId) {
+                        category.addProductToCategory(product);
+                    }
+                }
             }
 
         } catch (SQLException e) {
@@ -171,4 +168,17 @@ public class Repository {
     }
 }
 
+//  public void CreateCategory(List<Category> categories) {
+//        Scanner scanner = new Scanner(System.in);
+//        System.out.println("Choose a category: ");
+//        for(Category category : categories) {
+//            System.out.println(category.getCategoryID() + " " + category.getCategoryName());
+//        }
+//        int input = scanner.nextInt();
+//        for (Category categoryFound : categories) {
+//            if (categoryFound.equals(input)) {
+//                System.out.println("Category" + categoryFound.getCategoryName());
+//            }
+//        }
+//    }
 
