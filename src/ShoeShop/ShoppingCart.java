@@ -1,3 +1,7 @@
+package ShoeShop;
+
+import Customer.Customer;
+
 import java.util.ArrayList;
 import java.util.List;
 

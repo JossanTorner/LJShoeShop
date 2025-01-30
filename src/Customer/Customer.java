@@ -1,3 +1,5 @@
+package Customer;
+
 public class Customer {
 
     private int id;
@@ -53,4 +55,6 @@ public class Customer {
     public void setLoginDetails(LoginDetails loginDetails) {
         this.loginDetails = loginDetails;
     }
+
+
 }

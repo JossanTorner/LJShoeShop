@@ -1,3 +1,5 @@
+package ShoeShop;
+
 public class Product {
 
     private int id;

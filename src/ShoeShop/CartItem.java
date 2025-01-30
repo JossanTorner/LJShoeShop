@@ -1,3 +1,5 @@
+package ShoeShop;
+
 public class CartItem {
 
     Product product;

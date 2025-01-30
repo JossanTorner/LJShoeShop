@@ -1,29 +1,33 @@
+import Customer.Customer;
+//import ShoeShop.LJShoeShop;
+////import ShoeShop.LJShoeShop;
+
 import java.io.IOException;
-import java.util.Scanner;
 
 public class Main {
 
-    LJShoeShop shop;
-    Customer loggedIn;
 
-    public Main() throws IOException {
-        shop = new LJShoeShop();
+        public static void main (String[]args) throws IOException {
+
+            Repository.Repository rep = new Repository.Repository();
+            rep.validateLogIn();
+            // Main main = new Main();
+
+        }
     }
 
-    public String userPrompt(String prompt){
-        Scanner in = new Scanner(System.in);
-        System.out.println(prompt);
-        System.out.print("> ");
-        return in.nextLine();
-    }
 
-    public static void main (String[] args) throws IOException {
+// LJShoeShop shop;
+//Customer loggedIn;
+//
+//    public Main() throws IOException {
+////        LJShoeShop shop = new LJShoeShop();
+////    }
+//
+////    public String userPrompt(String prompt){
+////        Scanner in = new Scanner(System.in);
+////        System.out.println(prompt);
+////        System.out.print("> ");
+////        return in.nextLine();
+////    }
 
-//        Repository rep = new Repository();
-//        System.out.println(rep.getCustomers().stream().map(Customer::getFirstName).toList());
-
-        Main main = new Main();
-
-
-    }
-}

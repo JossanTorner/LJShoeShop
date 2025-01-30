@@ -1,3 +1,5 @@
+package ShoeShop;
+
 public class Specification {
 
     int id;

@@ -1,3 +1,5 @@
+package Customer;
+
 public class Location {
 
     private int id;
