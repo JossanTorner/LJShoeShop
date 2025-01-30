@@ -2,9 +2,7 @@ package Repository;
 
 import Customer.Customer;
 import Customer.LoginDetails;
-import ShoeShop.Product;
-import ShoeShop.Specification;
-import ShoeShop.Category;
+import ShoeShop.*;
 import ShoeShop.Product;
 import com.mysql.cj.x.protobuf.MysqlxCrud;
 
@@ -159,12 +157,45 @@ public class Repository {
 
     }
 
-    public void getShoppingCart(){
+    public ShoppingCart getShoppingCart(Customer customer, List<Product> products){
 
-    }
+        ShoppingCart shoppingCart = new ShoppingCart();
+        String query = "SELECT ShoppingCart.id as shoppingsCartId shoppingCartId, CartItem.productId, CartItem.quantity" +
+                "from ShoppingCart" +
+                "inner join CartItem on CartItem.cartId = ShoppingCart.id" +
+                "inner join Customer on Customer.id = ShoppingCart.customerId" +
+                " where ShoppingCart.customerId = ?";
 
-    public void addToShoppingCart(Product product){
+        try (Connection connection = DriverManager.getConnection(
+                properties.getProperty("connectionString"),
+                properties.getProperty("username"),
+                properties.getProperty("password"))) {
 
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, customer.getId());
+
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                int shoppingCartId = resultSet.getInt("shoppingsCartId");
+                int productId = resultSet.getInt("productId");
+                int quantity = resultSet.getInt("quantity");
+
+                shoppingCart.setId(shoppingCartId);
+
+                for(Product product : products){
+                    if(product.getId() == productId){
+                        CartItem item = new CartItem(product);
+                        item.setQuantity(quantity);
+                        shoppingCart.addToCart(item);
+                    }
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return shoppingCart;
     }
 }
 

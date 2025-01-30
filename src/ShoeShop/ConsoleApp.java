@@ -4,7 +4,6 @@ import Customer.Customer;
 import Repository.Repository;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -64,7 +63,7 @@ public class ConsoleApp {
                 //visa order history
             }
             case "3" ->{
-                //visa shopping cart
+                showShoppingCart();
             }
             case "4" -> {
                 loggedInCustomer = null;
@@ -105,17 +104,52 @@ public class ConsoleApp {
     public void handleCategoryChoice(Category chosenCategory){
         boolean found = false;
         Product selectedProduct = null;
-        for(Category category:LJcategories){
-            if(category.getCategoryName().equals(chosenCategory.getCategoryName())){
-                for (int i = 0; i < category.getProductsInCategory().size(); i++) {
-                    Product product = category.getProductsInCategory().get(i);
-                    System.out.println((i + 1) + " -> " + product.getProductName() +
-                            "\n" + product.getSpec().getBrand() +
-                            "\n" + product.getSpec().getColor() +
-                            "\n" + product.getSpec().getSize() +
-                            "\n" + product.getSpec().getPrice());
-                }
+        int choice;
+        for(int i = 0; i < chosenCategory.getProductsInCategory().size(); i++){
+            Product product = chosenCategory.getProductsInCategory().get(i);
+            System.out.println((i + 1) + " -> " + product.getProductName() +
+                    "\n" + product.getSpec().getBrand() +
+                    "\n" + product.getSpec().getColor() +
+                    "\n" + product.getSpec().getSize() +
+                    "\n" + product.getSpec().getPrice());
+        }
+
+        try{
+            choice = Integer.parseInt(input.nextLine());
+        }
+        catch (NumberFormatException e) {
+            throw new RuntimeException(e);
+        }
+
+        for(int i = 0; i<chosenCategory.getProductsInCategory().size(); i++){
+            if (choice > 0 && choice <= chosenCategory.getProductsInCategory().size()) {
+                selectedProduct = chosenCategory.getProductsInCategory().get(i);
+                break;
             }
+        }
+
+        if (selectedProduct != null) {
+            handleProductChosen(selectedProduct);
+        }
+    }
+
+    public void showShoppingCart(){
+        repository.getShoppingCart(loggedInCustomer, LJProducts);
+        for(CartItem item : loggedInCustomer.getShoppingCart().getItemsInCart()){
+            System.out.println(item.getProduct().getProductName() + ", " + item.getQuantity());
+        }
+    }
+
+    public void handleProductChosen(Product product){
+        boolean found = false;
+        for(CartItem item: loggedInCustomer.getShoppingCart().getItemsInCart()){
+            if (product.equals(item.getProduct())){
+                item.addToQuantity();
+                found = true;
+            }
+        }
+        if(!found){
+            loggedInCustomer.getShoppingCart().addToCart(new CartItem(product));
         }
     }
 
