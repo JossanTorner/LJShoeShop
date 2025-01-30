@@ -2,6 +2,8 @@ package Repository;
 
 import Customer.Customer;
 import Customer.LoginDetails;
+import ShoeShop.Category;
+import ShoeShop.Product;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -52,7 +54,7 @@ public class Repository {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Databasfel vid inloggning", e);
+            throw new RuntimeException("Invalid connection to database while logging in", e);
         }
     }
 
@@ -65,12 +67,57 @@ public class Repository {
         Customer loggedInCustomer = login(username, password);
 
         if (loggedInCustomer != null) {
-            System.out.println("Successful login! Welcome " +
+            System.out.println("Successful login!" + "n\" Welcome " +
                     loggedInCustomer.getFirstName() + " " +
                     loggedInCustomer.getLastName());
+            getCategories();
 
         } else {
             System.out.println("Invalid username or password");
+        }
+    }
+
+    public List<Category> getCategories() {
+        List<Category> categories = new ArrayList<>();
+        String query = "SELECT * FROM Category ";
+
+        try (Connection connection = DriverManager.getConnection(
+                properties.getProperty("connectionString"),
+                properties.getProperty("username"),
+                properties.getProperty("password"))) {
+
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String categoryname = resultSet.getString("categoryName");
+                Category category = new Category(categoryname, id);
+                categories.add(category);
+
+            }
+
+            CreateCategory(categories);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Invalid connection to database while collection categories", e);
+        }
+
+        return categories;
+    }
+
+    public void CreateCategory(List<Category> categories) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Choose a category: ");
+        for(Category category : categories) {
+            System.out.println(category.getCategoryID() + " " + category.getCategoryName());
+        }
+        int input = scanner.nextInt();
+        for (Category categoryFound : categories) {
+            if (categoryFound.equals(input)) {
+                System.out.println("Category" + categoryFound.getCategoryName());
+            }
         }
     }
 }

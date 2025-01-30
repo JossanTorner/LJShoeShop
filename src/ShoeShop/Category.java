@@ -8,6 +8,7 @@ public class Category {
     private int categoryID;
     private List<Product> productsInCategory;
 
+    public Category() {}
     public Category(String categoryName, int categoryID) {
         this.categoryName = categoryName;
         this.categoryID = categoryID;
