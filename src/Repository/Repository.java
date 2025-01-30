@@ -2,6 +2,8 @@ package Repository;
 
 import Customer.Customer;
 import Customer.LoginDetails;
+import ShoeShop.Product;
+import ShoeShop.Specification;
 import ShoeShop.Category;
 import ShoeShop.Product;
 
@@ -70,7 +72,6 @@ public class Repository {
             System.out.println("Successful login!" + " Welcome " +
                     loggedInCustomer.getFirstName() + " " +
                     loggedInCustomer.getLastName());
-            getCategories();
 
         } else {
             System.out.println("Invalid username or password");
@@ -117,6 +118,39 @@ public class Repository {
                 System.out.println("Category" + categoryFound.getCategoryName());
             }
         }
+    }
+
+    public List<Product> getProducts(){
+        List<Product> products = new ArrayList<>();
+
+        String query = "SELECT Product.id, Product.productName, Specification.price, Specification.shoeSize, Specification.color, Specification.brand " +
+                "from Product " +
+                "inner join " +
+                "Specification on Specification.id = Product.specId";
+
+        try (Connection connection = DriverManager.getConnection(
+                properties.getProperty("connectionString"),
+                properties.getProperty("username"),
+                properties.getProperty("password"))) {
+
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String productName = resultSet.getString("productName");
+                double price = resultSet.getDouble("price");
+                int shoeSize = resultSet.getInt("shoeSize");
+                String color = resultSet.getString("color");
+                String brand = resultSet.getString("brand");
+                products.add(new Product(id, productName, new Specification(price, shoeSize, color, brand)));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Databasfel vid inloggning", e);
+        }
+        return products;
     }
 }
 

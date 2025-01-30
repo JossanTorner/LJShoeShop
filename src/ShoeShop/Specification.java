@@ -2,33 +2,23 @@ package ShoeShop;
 
 public class Specification {
 
-    int id;
-    int price;
+    double price;
     int size;
     String color;
     String brand;
 
-    public Specification(int id, int price, int size, String color, String brand) {
-        this.id = id;
+    public Specification(double price, int size, String color, String brand) {
         this.price = price;
         this.size = size;
         this.color = color;
         this.brand = brand;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(double price) {
         this.price = price;
     }
 
