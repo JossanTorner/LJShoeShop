@@ -9,19 +9,18 @@ import java.util.Scanner;
 
 public class ConsoleApp {
 
+    Repository repository;
     List<Category> LJcategories;
     List<Product> LJProducts;
+    List<OutOfStockItem> outOfStock;
     Scanner input = new Scanner(System.in);
+
     boolean running = true;
     UserState currentState = UserState.LOGIN;
-    Repository repository;
     Customer loggedInCustomer = null;
 
     public ConsoleApp() throws IOException {
-        repository = new Repository();
-        LJcategories = repository.getCategories();
-        System.out.println(LJcategories.stream().map(Category::getCategoryName).toList());
-        LJProducts = repository.getProducts(LJcategories);
+        setUpStore();
     }
 
     public void run(){
@@ -102,7 +101,6 @@ public class ConsoleApp {
     }
 
     public void handleCategoryChoice(Category chosenCategory){
-        boolean found = false;
         Product selectedProduct = null;
         int choice;
         for(int i = 0; i < chosenCategory.getProductsInCategory().size(); i++){
@@ -123,13 +121,14 @@ public class ConsoleApp {
 
         for(int i = 0; i<chosenCategory.getProductsInCategory().size(); i++){
             if (choice > 0 && choice <= chosenCategory.getProductsInCategory().size()) {
-                selectedProduct = chosenCategory.getProductsInCategory().get(i);
+                selectedProduct = chosenCategory.getProductsInCategory().get(choice-1);
+                System.out.println("Selected product: " + selectedProduct.getProductName());
                 break;
             }
         }
 
         if (selectedProduct != null) {
-            handleProductChosen(selectedProduct);
+            addProductToCart(selectedProduct);
         }
     }
 
@@ -141,22 +140,32 @@ public class ConsoleApp {
         }
     }
 
-    public void handleProductChosen(Product product){
-        boolean found = false;
-        for(CartItem item: loggedInCustomer.getShoppingCart().getItemsInCart()){
-            if (product.equals(item.getProduct())){
-                item.addToQuantity();
-                found = true;
-            }
-        }
-        if(!found){
-            loggedInCustomer.getShoppingCart().addToCart(new CartItem(product));
-        }
-    }
+//    public void handleProductChosen(Product product){
+//
+////        boolean found = false;
+////        for(CartItem item: loggedInCustomer.getShoppingCart().getItemsInCart()){
+////            if (product.equals(item.getProduct())){
+////
+////            }
+////        }
+////        if(!found){
+////            loggedInCustomer.getShoppingCart().addToCart(new CartItem(product));
+////        }
+//    }
 
     //denna method behöver anropa SP
-    public void addProductToCart(String input){
-
+    public void addProductToCart(Product product){
+        boolean soldOut = false;
+        for(OutOfStockItem item: outOfStock){
+            if(item.getProduct().getId() == product.getId()){
+                System.out.println("Product is out of stock!");
+                soldOut = true;
+                break;
+            }
+        }
+        if(!soldOut){
+            repository.addItemToCart(loggedInCustomer, product);
+        }
     }
 
     public void validateLogIn(String username, String password){
@@ -167,6 +176,7 @@ public class ConsoleApp {
         }
         else{
             currentState = UserState.MAIN_MENU;
+            loggedInCustomer.setShoppingCart(repository.getShoppingCart(loggedInCustomer));
         }
     }
 
@@ -178,6 +188,18 @@ public class ConsoleApp {
     public void shoppingCart(){
         System.out.println(loggedInCustomer.getFirstName() + " " + loggedInCustomer.getLastName() + " SHOPPING CART");
         // här ska alla varor som nuvarande ligger i kundvagnen visas, man ska kunna välja vara för att ta bort eller lägga till mer av den?
+    }
+
+    public void setUpStore() throws IOException {
+        repository = new Repository();
+        LJcategories = repository.getCategories();
+        System.out.println(LJcategories.stream().map(Category::getCategoryName).toList());
+        LJProducts = repository.getProducts();
+        repository.putProductsInCategories(LJcategories, LJProducts);
+        for(Product product : LJProducts) {
+            System.out.println(product.getProductName() + " ID: " + product.getId());
+        }
+        outOfStock = repository.getProductsOutOfStock(LJProducts);
     }
 
     public static void main(String[] args) throws IOException {

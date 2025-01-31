@@ -8,6 +8,7 @@ import ShoeShop.Product;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -87,15 +88,12 @@ public class Repository {
 
 
     //returnerar en lista med alla produkter + lägger in dem i tillhörande kategorier
-    public List<Product> getProducts(List<Category> categories) {
+    public List<Product> getProducts() {
         List<Product> products = new ArrayList<>();
 
-        String query = "SELECT Product.id as productId, Product.productName, Specification.price, Specification.shoeSize, Specification.color, Specification.brand, Category.id as categoryId" +
-                " from Product" +
-                " inner join Specification on Specification.id = Product.specId" +
-                " inner join ProductInCategory on ProductInCategory.productId = Product.id" +
-                " inner join Category on Category.id = ProductInCategory.categoryId" +
-                " where Category.id = ProductInCategory.categoryId";
+        String query = "SELECT Product.id as productId, Product.productName, Specification.price, Specification.shoeSize, Specification.color, Specification.brand " +
+                "from Product " +
+                "inner join Specification on Specification.id = Product.specId ";
 
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
@@ -112,22 +110,44 @@ public class Repository {
                 int shoeSize = resultSet.getInt("shoeSize");
                 String color = resultSet.getString("color");
                 String brand = resultSet.getString("brand");
-                int categoryId = resultSet.getInt("categoryId");
                 Product product = new Product(productId, productName, new Specification(price, shoeSize, color, brand));
                 products.add(product);
-
-                for (Category category : categories) {
-                    if (category.getCategoryID() == categoryId) {
-                        category.addProductToCategory(product);
-                    }
-                }
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Databasfel vid inläsning av produkter", e);
         }
+
         return products;
+    }
+
+    public void putProductsInCategories(List<Category> categories, List<Product> products) {
+        String query = "SELECT * FROM ProductInCategory";
+        try (Connection connection = DriverManager.getConnection(
+                properties.getProperty("connectionString"),
+                properties.getProperty("username"),
+                properties.getProperty("password"))) {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+
+            while(resultSet.next()){
+                int productId = resultSet.getInt("productId");
+                int categoryId = resultSet.getInt("categoryId");
+                for(Category category : categories){
+                    if(category.getCategoryID() == categoryId){
+                        for(Product product : products){
+                            if(product.getId() == productId){
+                                category.addProductToCategory(product);
+                            }
+                        }
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     //laddar en shoppingcart med produkter som ligger i den i databasen
@@ -195,6 +215,57 @@ public class Repository {
 
     public void getOrderDetails() {
 
+    }
+
+    public void addItemToCart(Customer customer, Product product){
+        try (Connection connection = DriverManager.getConnection(
+                properties.getProperty("connectionString"),
+                properties.getProperty("username"),
+                properties.getProperty("password"))) {
+
+            CallableStatement callState = connection.prepareCall("CALL AddToCart(?, ?, ?)");
+            callState.setInt(1, customer.getId());
+            System.out.println("Customer id: " + customer.getId());
+            callState.setInt(2, customer.getShoppingCart().getId());
+            System.out.println("Customer shoppingcart Id " + customer.getShoppingCart().getId());
+            callState.setInt(3, product.getId());
+            System.out.println("Product id: " + product.getId());
+            callState.execute();
+            callState.close();
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<OutOfStockItem> getProductsOutOfStock(List<Product> products){
+        List<OutOfStockItem> outOfStock = new ArrayList<>();
+        String query = "SELECT * FROM OutOfStock";
+
+        try (Connection connection = DriverManager.getConnection(
+                properties.getProperty("connectionString"),
+                properties.getProperty("username"),
+                properties.getProperty("password"))) {
+
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+
+            while(resultSet.next()){
+                int productId = resultSet.getInt("productId");
+                Date date = resultSet.getDate("soldOutSince");
+                for(Product product : products){
+                    if (product.getId() == productId){
+                        OutOfStockItem item = new OutOfStockItem(product, date);
+                        outOfStock.add(item);
+                    }
+                }
+            }
+
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return outOfStock;
     }
 
 }
