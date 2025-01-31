@@ -35,9 +35,9 @@ public class ConsoleApp {
 
     public void logInPrompt(){
         System.out.println("LOG IN");
-        System.out.println("Username: ");
+        System.out.print("Username:\n-> ");
         String username = input.nextLine();
-        System.out.println("Password: ");
+        System.out.print("Password:\n-> ");
         String password = input.nextLine();
         validateLogIn(username, password);
     }
@@ -48,9 +48,8 @@ public class ConsoleApp {
                 "[1] Shop" +
                 "\n[2] Order history" +
                 "\n[3] Shopping cart" +
-                "\n[4] Log out" +
-                "\n[5] Exit");
-        System.out.println("Menu choice: ");
+                "\n[4] Log out");
+        System.out.print("-> ");
         handleMenuInput(input.nextLine());
     }
 
@@ -82,9 +81,10 @@ public class ConsoleApp {
         System.out.println("Choose a category: ");
         int count = 1;
         for(int i = 0; i < LJcategories.size(); i++){
-            System.out.println(count++ + " -> " + LJcategories.get(i).getCategoryName());
+            System.out.println("[" + (count++) + "] " + LJcategories.get(i).getCategoryName());
         }
 
+        System.out.print("-> ");
         try{
             categoryChoice = Integer.parseInt(input.nextLine());
         }
@@ -104,55 +104,69 @@ public class ConsoleApp {
     public void handleCategoryChoice(Category chosenCategory){
         Product selectedProduct = null;
         int choice;
-        for(int i = 0; i < chosenCategory.getProductsInCategory().size(); i++){
-            Product product = chosenCategory.getProductsInCategory().get(i);
-            System.out.println((i + 1) + " -> " + product.getProductName() +
-                    "\n" + product.getSpec().getBrand() +
-                    "\n" + product.getSpec().getColor() +
-                    "\n" + product.getSpec().getSize() +
-                    "\n" + product.getSpec().getPrice());
-        }
+        if(!chosenCategory.getProductsInCategory().isEmpty()){
+            for(int i = 0; i < chosenCategory.getProductsInCategory().size(); i++){
+                Product product = chosenCategory.getProductsInCategory().get(i);
+                System.out.println("[" + (i + 1) + "] " + product.getProductName() +
+                        "\nBrand: " + product.getSpec().getBrand() +
+                        "\nColor: " + product.getSpec().getColor() +
+                        "\nSize: " + product.getSpec().getSize() +
+                        "\nPrice: " + product.getSpec().getPrice());
+                System.out.println();
+            }
 
-        try{
-            choice = Integer.parseInt(input.nextLine());
-        }
-        catch (NumberFormatException e) {
-            throw new RuntimeException(e);
-        }
+            System.out.print("-> ");
+            try{
+                choice = Integer.parseInt(input.nextLine());
+            }
+            catch (NumberFormatException e) {
+                throw new RuntimeException(e);
+            }
 
-        for(int i = 0; i<chosenCategory.getProductsInCategory().size(); i++){
-            if (choice > 0 && choice <= chosenCategory.getProductsInCategory().size()) {
-                selectedProduct = chosenCategory.getProductsInCategory().get(choice-1);
-                System.out.println("Selected product: " + selectedProduct.getProductName());
-                break;
+            for(int i = 0; i<chosenCategory.getProductsInCategory().size(); i++){
+                if (choice > 0 && choice <= chosenCategory.getProductsInCategory().size()) {
+                    selectedProduct = chosenCategory.getProductsInCategory().get(choice-1);
+                    System.out.println("Selected product: " + selectedProduct.getProductName());
+                    break;
+                }
+            }
+
+            if (selectedProduct != null) {
+                addProductToCart(selectedProduct);
             }
         }
-
-        if (selectedProduct != null) {
-            addProductToCart(selectedProduct);
+        else{
+            System.out.println("No products found");
         }
     }
 
     public void showShoppingCart(){
         loggedInCustomer.setShoppingCart(repository.getShoppingCart(loggedInCustomer));
         loggedInCustomer.getShoppingCart().setItemsInCart(repository.loadShoppingCart(loggedInCustomer.getShoppingCart(), LJProducts));
-        for(CartItem item: loggedInCustomer.getShoppingCart().getItemsInCart()){
-            System.out.println(item.getProduct().getProductName() + " - Quantity: " + item.getQuantity());
+        System.out.println("--YOUR SHOPPING CART--");
+        if (loggedInCustomer.getShoppingCart().getItemsInCart().isEmpty()){
+            System.out.println("Your shopping cart is empty!");
         }
+        else{
+            for(CartItem item: loggedInCustomer.getShoppingCart().getItemsInCart()){
+                System.out.println(item.getProduct().getProductName() + " - qty: " + item.getQuantity());
+            }
+        }
+        System.out.println("[1] Make order" + "\n[2] Back to menu");
+        System.out.print("-> ");
+
+        String choice = input.nextLine();
+        switch (choice) {
+            case "1" -> placeOrder(); // Call method to place the order
+            case "2" -> currentState = UserState.MAIN_MENU; // Return to the main menu
+            default -> System.out.println("Invalid choice. Returning to menu.");
+        }
+
     }
 
-//    public void handleProductChosen(Product product){
-//
-////        boolean found = false;
-////        for(CartItem item: loggedInCustomer.getShoppingCart().getItemsInCart()){
-////            if (product.equals(item.getProduct())){
-////
-////            }
-////        }
-////        if(!found){
-////            loggedInCustomer.getShoppingCart().addToCart(new CartItem(product));
-////        }
-//    }
+    public void placeOrder(){
+
+    }
 
     //denna method behöver anropa SP
     public void addProductToCart(Product product){
@@ -191,66 +205,10 @@ public class ConsoleApp {
         LJProducts = repository.getProducts();
         repository.putProductsInCategories(LJcategories, LJProducts);
         outOfStock = repository.getProductsOutOfStock(LJProducts);
-        //System.out.println(LJcategories.stream().map(Category::getCategoryName).toList());
-//        for(Product product : LJProducts) {
-//            System.out.println(product.getProductName() + " ID: " + product.getId());
-//        }
     }
 
     public static void main(String[] args) throws IOException {
         ConsoleApp app = new ConsoleApp();
         app.run();
     }
-
-
-//    public void handleCategoryInput(String userInput) {
-//        boolean found = false;
-//        Product selectedProduct = null;
-//
-//        System.out.println("Products: ");
-//        for (Category category : LJcategories) {
-//            if (category.getCategoryName().equals(userInput)) {
-//                for (int i = 0; i < category.getProductsInCategory().size(); i++) {
-//                    Product product = category.getProductsInCategory().get(i);
-//                    System.out.println((i + 1) + " -> " + product.getProductName() +
-//                            "\n" + product.getSpec().getBrand() +
-//                            "\n" + product.getSpec().getColor() +
-//                            "\n" + product.getSpec().getSize() +
-//                            "\n" + product.getSpec().getPrice());
-//                }
-//                //System.out.println(category.getProductsInCategory().stream().map(Product::getProductName).toList());
-//                found = true;
-//            }
-//            if (!found) {
-//                System.out.println("Invalid input");
-//                return;
-//            }
-//        }
-//        System.out.println("Make your choice...");
-//
-//        int choice;
-//        try {
-//            choice = Integer.parseInt(input.nextLine());
-//        } catch (NumberFormatException e) {
-//            System.out.println("Invalid choice. Please enter a number.");
-//            return;
-//        }
-//
-//        // Find the selected product
-//        for (Category category : LJcategories) {
-//            if (category.getCategoryName().equals(input)) {
-//                if (choice > 0 && choice <= category.getProductsInCategory().size()) {
-//                    selectedProduct = category.getProductsInCategory().get(choice - 1);
-//                } else {
-//                    System.out.println("Invalid selection.");
-//                    return;
-//                }
-//            }
-//        }
-//
-//        if (selectedProduct != null) {
-//            addProductToCart(selectedProduct);
-//        }
-//    }
-
 }
