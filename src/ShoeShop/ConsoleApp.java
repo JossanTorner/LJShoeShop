@@ -20,7 +20,8 @@ public class ConsoleApp {
     Customer loggedInCustomer = null;
 
     public ConsoleApp() throws IOException {
-        setUpStore();
+        repository = new Repository();
+        updateStore();
     }
 
     public void run(){
@@ -185,21 +186,15 @@ public class ConsoleApp {
         // här ska alla orders listas upp, man ska kunna välja order för att titta närmre på vilka varor som var i den
     }
 
-    public void shoppingCart(){
-        System.out.println(loggedInCustomer.getFirstName() + " " + loggedInCustomer.getLastName() + " SHOPPING CART");
-        // här ska alla varor som nuvarande ligger i kundvagnen visas, man ska kunna välja vara för att ta bort eller lägga till mer av den?
-    }
-
-    public void setUpStore() throws IOException {
-        repository = new Repository();
+    public void updateStore() throws IOException {
         LJcategories = repository.getCategories();
-        System.out.println(LJcategories.stream().map(Category::getCategoryName).toList());
         LJProducts = repository.getProducts();
         repository.putProductsInCategories(LJcategories, LJProducts);
-        for(Product product : LJProducts) {
-            System.out.println(product.getProductName() + " ID: " + product.getId());
-        }
         outOfStock = repository.getProductsOutOfStock(LJProducts);
+        //System.out.println(LJcategories.stream().map(Category::getCategoryName).toList());
+//        for(Product product : LJProducts) {
+//            System.out.println(product.getProductName() + " ID: " + product.getId());
+//        }
     }
 
     public static void main(String[] args) throws IOException {
