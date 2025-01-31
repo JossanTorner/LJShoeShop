@@ -4,7 +4,6 @@ import Customer.Customer;
 import Customer.LoginDetails;
 import ShoeShop.*;
 import ShoeShop.Product;
-import com.mysql.cj.x.protobuf.MysqlxCrud;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,7 +11,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Scanner;
 
 public class Repository {
 
@@ -183,7 +181,6 @@ public class Repository {
 
             while (resultSet.next()) {
                 int shoppingCartId = resultSet.getInt("id");
-                System.out.println("ShoppingcartId in rep: " + shoppingCartId);
                 shoppingCart.setId(shoppingCartId);
             }
         } catch (SQLException e) {
