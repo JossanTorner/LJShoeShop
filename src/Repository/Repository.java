@@ -75,7 +75,6 @@ public class Repository {
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String categoryName = resultSet.getString("categoryName");
-
                 Category category = new Category(categoryName, id);
                 categories.add(category);
             }
@@ -209,9 +208,40 @@ public class Repository {
         return shoppingCart;
     }
 
-    public void getOrderHistory(Customer customer) {
+    public List<Order> getOrderHistory(Customer customer) {
+        List<Order> orderHistory = new ArrayList<>();
+        String query = "SELECT CustomerOrder.id, CustomerOrder.dateOfOrder, CustomerOrder.customerId " +
+                "FROM CustomerOrder " +
+                "INNER JOIN Customer on Customer.id = CustomerOrder.customerId WHERE Customer.id = ? ";
 
+        try (Connection connection = DriverManager.getConnection(
+                properties.getProperty("connectionString"),
+                properties.getProperty("username"),
+                properties.getProperty("password"))) {
+
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, customer.getId());
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                int orderID = resultSet.getInt("id");
+                String dateOfOrder = resultSet.getString("dateOfOrder");
+                Order fetchedOrder = new Order (orderID, dateOfOrder);
+                orderHistory.add(fetchedOrder);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Error while getting order history");
+        }
+
+        if (orderHistory.isEmpty()) {
+            System.out.println("No orders found.");
+        }
+
+        return orderHistory;
     }
+
 
     public void getOrderDetails() {
 

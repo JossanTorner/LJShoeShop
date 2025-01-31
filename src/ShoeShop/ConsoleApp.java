@@ -4,6 +4,8 @@ import Customer.Customer;
 import Repository.Repository;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
@@ -18,6 +20,7 @@ public class ConsoleApp {
     boolean running = true;
     UserState currentState = UserState.LOGIN;
     Customer loggedInCustomer = null;
+    Order order = new Order();
 
     public ConsoleApp() throws IOException {
         repository = new Repository();
@@ -59,7 +62,7 @@ public class ConsoleApp {
                 categoriesPrompt();
             }
             case "2" ->{
-                //visa order history
+                orderHistory();
             }
             case "3" ->{
                 showShoppingCart();
@@ -195,10 +198,19 @@ public class ConsoleApp {
         }
     }
 
-    public void orderHistory(){
+
+    public void orderHistory() {
         System.out.println(loggedInCustomer.getFirstName() + " " + loggedInCustomer.getLastName() + " ORDER HISTORY: ");
-        // här ska alla orders listas upp, man ska kunna välja order för att titta närmre på vilka varor som var i den
-    }
+        List<Order> orderHistory = repository.getOrderHistory(loggedInCustomer);
+        for (Order order : orderHistory) {
+                System.out.println(order.getCustomerOrderID() + order.getOrderDate());
+            }
+            if (orderHistory == null || orderHistory.isEmpty()) {
+                System.out.println("No order history found for this customer.");
+            }
+        }
+
+
 
     public void updateStore() throws IOException {
         LJcategories = repository.getCategories();
