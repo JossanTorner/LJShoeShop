@@ -1,5 +1,6 @@
 package Customer;
 
+import ShoeShop.Order;
 import ShoeShop.ShoppingCart;
 
 public class Customer {
@@ -10,6 +11,7 @@ public class Customer {
     private long sscr;
     LoginDetails loginDetails;
     ShoppingCart shoppingCart;
+    Order orderHistory;
 
     public Customer(int id, String firstName, String lastName, long sscr, LoginDetails loginDetails) {
         this.id = id;
@@ -18,6 +20,7 @@ public class Customer {
         this.sscr = sscr;
         this.loginDetails = loginDetails;
         shoppingCart = new ShoppingCart();
+        orderHistory = new Order();
     }
 
     public int getId() {
@@ -63,4 +66,7 @@ public class Customer {
     public void setShoppingCart(ShoppingCart shoppingCart) {
         this.shoppingCart = shoppingCart;
     }
+
+    public Order getOrderHistory() { return orderHistory;}
+
 }
