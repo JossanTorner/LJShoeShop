@@ -31,12 +31,11 @@ public class Repository {
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
                 properties.getProperty("username"),
-                properties.getProperty("password"))) {
+                properties.getProperty("password"));
+             PreparedStatement statement = connection.prepareStatement(query)){
 
-            PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, username);
             statement.setString(2, password);
-
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
@@ -66,11 +65,10 @@ public class Repository {
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
                 properties.getProperty("username"),
-                properties.getProperty("password"))) {
+                properties.getProperty("password"));
+             Statement statement = connection.createStatement()) {
 
-            Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
-
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String categoryName = resultSet.getString("categoryName");
@@ -96,9 +94,9 @@ public class Repository {
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
                 properties.getProperty("username"),
-                properties.getProperty("password"))) {
+                properties.getProperty("password"));
+             Statement statement = connection.createStatement()) {
 
-            Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
 
             while (resultSet.next()) {
@@ -125,17 +123,17 @@ public class Repository {
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
                 properties.getProperty("username"),
-                properties.getProperty("password"))) {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
+                properties.getProperty("password"));
+             Statement statement = connection.createStatement()) {
 
-            while(resultSet.next()){
+            ResultSet resultSet = statement.executeQuery(query);
+            while (resultSet.next()) {
                 int productId = resultSet.getInt("productId");
                 int categoryId = resultSet.getInt("categoryId");
-                for(Category category : categories){
-                    if(category.getCategoryID() == categoryId){
-                        for(Product product : products){
-                            if(product.getId() == productId){
+                for (Category category : categories) {
+                    if (category.getCategoryID() == categoryId) {
+                        for (Product product : products) {
+                            if (product.getId() == productId) {
                                 category.addProductToCategory(product);
                             }
                         }
@@ -156,11 +154,10 @@ public class Repository {
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
                 properties.getProperty("username"),
-                properties.getProperty("password"))) {
+                properties.getProperty("password"));
+                PreparedStatement statement = connection.prepareStatement(query)){
 
-            PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, cart.getId());
-
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -190,11 +187,10 @@ public class Repository {
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
                 properties.getProperty("username"),
-                properties.getProperty("password"))) {
+                properties.getProperty("password"));
+             PreparedStatement statement = connection.prepareStatement(query)) {
 
-            PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, customer.getId());
-
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -216,21 +212,20 @@ public class Repository {
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
                 properties.getProperty("username"),
-                properties.getProperty("password"))) {
+                properties.getProperty("password"));
+             PreparedStatement statement = connection.prepareStatement(query)) {
 
-            PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, loggedInCustomer.getId());
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
                 int orderID = resultSet.getInt("id");
                 String dateOfOrder = resultSet.getString("dateOfOrder");
-                Order collectedOrder = new Order (orderID, dateOfOrder);
+                Order collectedOrder = new Order(orderID, dateOfOrder);
                 orderHistory.add(collectedOrder);
             }
 
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("Error while getting order history");
         }
@@ -251,9 +246,9 @@ public class Repository {
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
                 properties.getProperty("username"),
-                properties.getProperty("password"))) {
+                properties.getProperty("password"));
+                PreparedStatement statement = connection.prepareStatement(query)) {
 
-            PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, customer.getId());
             ResultSet resultSet = statement.executeQuery();
 
@@ -261,10 +256,10 @@ public class Repository {
                 int orderId = resultSet.getInt("orderId");
                 int productID = resultSet.getInt("productId");
                 int quantity = resultSet.getInt("quantity");
-                for(Order order: customer.getOrderHistory()){
-                    if(order.getCustomerOrderID() == orderId){
-                        for(Product product:productsInShop){
-                            if(product.getId() == productID){
+                for (Order order : customer.getOrderHistory()) {
+                    if (order.getCustomerOrderID() == orderId) {
+                        for (Product product : productsInShop) {
+                            if (product.getId() == productID) {
                                 Item item = new Item(product, quantity);
                                 order.addItemToOrder(item);
                             }
@@ -272,19 +267,19 @@ public class Repository {
                     }
                 }
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public void addItemToCart(Customer customer, Product product){
+    public void addItemToCart(Customer customer, Product product) {
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
                 properties.getProperty("username"),
-                properties.getProperty("password"))) {
+                properties.getProperty("password"));
+        CallableStatement callState = connection.prepareCall("CALL AddToCart(?, ?, ?)")) {
 
-            CallableStatement callState = connection.prepareCall("CALL AddToCart(?, ?, ?)");
+
             callState.setInt(1, customer.getId());
             System.out.println("Customer id: " + customer.getId());
             callState.setInt(2, customer.getShoppingCart().getId());
@@ -292,99 +287,57 @@ public class Repository {
             callState.setInt(3, product.getId());
             System.out.println("Product id: " + product.getId());
             callState.execute();
-            callState.close();
-        }
-        catch (SQLException e) {
+
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public List<OutOfStockItem> getProductsOutOfStock(List<Product> products){
+    public List<OutOfStockItem> getProductsOutOfStock(List<Product> products) {
         List<OutOfStockItem> outOfStock = new ArrayList<>();
         String query = "SELECT * FROM OutOfStock ";
 
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
                 properties.getProperty("username"),
-                properties.getProperty("password"))) {
+                properties.getProperty("password"));
+             Statement statement = connection.createStatement()) {
 
-            Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
 
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 int productId = resultSet.getInt("productId");
                 Date date = resultSet.getDate("soldOutSince");
-                for(Product product : products){
-                    if (product.getId() == productId){
+                for (Product product : products) {
+                    if (product.getId() == productId) {
                         OutOfStockItem item = new OutOfStockItem(product, date);
                         outOfStock.add(item);
                     }
                 }
             }
 
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return outOfStock;
     }
 
+    public void placeOrder(ShoppingCart shoppingCart, Customer customer) {
+        try (Connection connection = DriverManager.getConnection(
+                properties.getProperty("connectionString"),
+                properties.getProperty("username"),
+                properties.getProperty("password"));
+             CallableStatement callStatement = connection.prepareCall("CALL PlaceOrder(?,?)")) {
+
+            callStatement.setInt(1, shoppingCart.getId());
+            callStatement.setInt(2, customer.getId());
+            callStatement.execute();
+        }
+        catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
 }
 
 
-//    public void validateLogIn() {
-//        Scanner scanner = new Scanner(System.in);
-//        System.out.print("Användarnamn: ");
-//        String username = scanner.nextLine();
-//        System.out.print("Lösenord: ");
-//        String password = scanner.nextLine();
-//        Customer loggedInCustomer = login(username, password);
-//
-//        if (loggedInCustomer != null) {
-//            System.out.println("Successful login!" + " Welcome " +
-//                    loggedInCustomer.getFirstName() + " " +
-//                    loggedInCustomer.getLastName());
-//
-//        } else {
-//            System.out.println("Invalid username or password");
-//        }
-//    }
-
-//    public List<Item> getOrderDetails(int orderId, List<Product> productsInShop) {
-//        List<Item> orderedItems = new ArrayList<>();
-//
-//       String query = "SELECT OrderedProduct.orderId, OrderedProduct.productId, OrderedProduct.quantity, " +
-//               "Customer.id, Product.productName " +
-//               "FROM OrderedProduct " +
-//               "INNER JOIN CustomerOrder ON CustomerOrder.id = OrderedProduct.orderId " +
-//               "INNER JOIN Customer ON Customer.id = CustomerOrder.customerId " +
-//               "INNER JOIN Product ON Product.id = OrderedProduct.productId " +
-//               "WHERE OrderedProduct.orderId = ? ";
-//
-//        try (Connection connection = DriverManager.getConnection(
-//                properties.getProperty("connectionString"),
-//                properties.getProperty("username"),
-//                properties.getProperty("password"))) {
-//
-//            PreparedStatement statement = connection.prepareStatement(query);
-//            statement.setInt(1, orderId);
-//            ResultSet resultSet = statement.executeQuery();
-//
-//            while (resultSet.next()) {
-//                orderId = resultSet.getInt("orderId");
-//                int productID = resultSet.getInt("productId");
-//                int quantity = resultSet.getInt("quantity");
-//                String productName = resultSet.getString("productName");
-//                for(Product product:productsInShop){
-//                    if(product.getId() == productID){
-//                        Item item = new Item(product, quantity);
-//                        orderedItems.add(item);
-//                    }
-//                }
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return orderedItems;
-//    }

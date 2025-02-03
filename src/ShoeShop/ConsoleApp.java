@@ -163,7 +163,19 @@ public class ConsoleApp {
     }
 
     public void placeOrder() {
-
+        boolean validOrder = true;
+        for(Item item : loggedInCustomer.getShoppingCart().getItemsInCart()) {
+           for(OutOfStockItem soldOutProduct :outOfStock){
+               if(item.getProduct().getId() == soldOutProduct.getProduct().getId()){
+                   System.out.println("Sold out product: " + item.getProduct().getProductName());
+                   validOrder = false;
+               }
+           }
+       }
+       if(validOrder){
+           repository.placeOrder(loggedInCustomer.getShoppingCart(), loggedInCustomer);
+           System.out.println("Order placed!");
+       }
     }
 
     //denna method behöver anropa SP
@@ -213,14 +225,7 @@ public class ConsoleApp {
                 System.out.println("Product: " + item.getProduct().getProductName() + " qty: " + item.getQuantity());
             }
         }
-//        orderedItems = repository.getOrderDetails(loggedInCustomer.getOrderHistory().getCustomerOrderID());
-//        loggedInCustomer.getLoginDetails().
-//        System.out.println("ORDER DETAILS: ");
-//        for (Item ordered : orderedItems) {
-//            System.out.println("Product " + " " + ordered.getProductName() + " " + "Quantity " + " " + ordered.getQuantity());
-        }
-
-
+    }
 
     public void updateStore() throws IOException {
         LJcategories = repository.getCategories();
