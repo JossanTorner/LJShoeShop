@@ -6,25 +6,25 @@ import java.util.List;
 public class ShoppingCart {
 
     int id;
-    List<CartItem> cartItemList;
+    List<Item> cartItemList;
 
     public ShoppingCart() {
-        this.cartItemList = new ArrayList<CartItem>();
+        this.cartItemList = new ArrayList<Item>();
     }
 
-    public void addToCart(CartItem cartItem) {
+    public void addToCart(Item cartItem) {
         this.cartItemList.add(cartItem);
     }
 
-    public void removeFromCart(CartItem cartItem) {
+    public void removeFromCart(Item cartItem) {
         this.cartItemList.remove(cartItem);
     }
 
-    public List<CartItem> getItemsInCart() {
+    public List<Item> getItemsInCart() {
         return cartItemList;
     }
 
-    public void setItemsInCart(List<CartItem> cartItemList) {
+    public void setItemsInCart(List<Item> cartItemList) {
         this.cartItemList = cartItemList;
     }
 

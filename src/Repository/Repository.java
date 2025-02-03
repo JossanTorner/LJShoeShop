@@ -8,7 +8,6 @@ import ShoeShop.Product;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -150,8 +149,8 @@ public class Repository {
     }
 
     //laddar en shoppingcart med produkter som ligger i den i databasen
-    public List<CartItem> loadShoppingCart(ShoppingCart cart, List<Product> products) {
-        List<CartItem> items = new ArrayList<>();
+    public List<Item> loadShoppingCart(ShoppingCart cart, List<Product> products) {
+        List<Item> items = new ArrayList<>();
         String query = "SELECT CartItem.productId, cartItem.quantity FROM CartItem where CartItem.cartId = ?";
 
         try (Connection connection = DriverManager.getConnection(
@@ -170,7 +169,7 @@ public class Repository {
 
                 for (Product product : products) {
                     if (product.getId() == productId) {
-                        CartItem item = new CartItem(product);
+                        Item item = new Item(product);
                         item.setQuantity(quantity);
                         items.add(item);
                     }
@@ -208,11 +207,46 @@ public class Repository {
         return shoppingCart;
     }
 
-    public List<Order> getOrderHistory(Customer customer) {
+    public List<Order> getOrderHistory(Customer loggedInCustomer) {
         List<Order> orderHistory = new ArrayList<>();
-        String query = "SELECT CustomerOrder.id, CustomerOrder.dateOfOrder, CustomerOrder.customerId " +
+        String query = "SELECT CustomerOrder.id, CustomerOrder.dateOfOrder " +
                 "FROM CustomerOrder " +
                 "INNER JOIN Customer on Customer.id = CustomerOrder.customerId WHERE Customer.id = ? ";
+
+        try (Connection connection = DriverManager.getConnection(
+                properties.getProperty("connectionString"),
+                properties.getProperty("username"),
+                properties.getProperty("password"))) {
+
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, loggedInCustomer.getId());
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                int orderID = resultSet.getInt("id");
+                String dateOfOrder = resultSet.getString("dateOfOrder");
+                Order collectedOrder = new Order (orderID, dateOfOrder);
+                orderHistory.add(collectedOrder);
+            }
+
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Error while getting order history");
+        }
+
+        if (orderHistory.isEmpty()) {
+            System.out.println("No orders found.");
+        }
+        return orderHistory;
+    }
+
+    public void loadOrders(Customer customer, List<Product> productsInShop) {
+        String query = "SELECT OrderedProduct.orderId, OrderedProduct.productId, OrderedProduct.quantity " +
+                "FROM OrderedProduct " +
+                "INNER JOIN CustomerOrder ON CustomerOrder.id = OrderedProduct.orderId " +
+                "INNER JOIN Customer ON Customer.id = CustomerOrder.customerId " +
+                "WHERE CustomerOrder.customerId = ? ";
 
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
@@ -224,27 +258,24 @@ public class Repository {
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                int orderID = resultSet.getInt("id");
-                String dateOfOrder = resultSet.getString("dateOfOrder");
-                Order fetchedOrder = new Order (orderID, dateOfOrder);
-                orderHistory.add(fetchedOrder);
+                int orderId = resultSet.getInt("orderId");
+                int productID = resultSet.getInt("productId");
+                int quantity = resultSet.getInt("quantity");
+                for(Order order: customer.getOrderHistory()){
+                    if(order.getCustomerOrderID() == orderId){
+                        for(Product product:productsInShop){
+                            if(product.getId() == productID){
+                                Item item = new Item(product, quantity);
+                                order.addItemToOrder(item);
+                            }
+                        }
+                    }
+                }
             }
-
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("Error while getting order history");
         }
-
-        if (orderHistory.isEmpty()) {
-            System.out.println("No orders found.");
-        }
-
-        return orderHistory;
-    }
-
-
-    public void getOrderDetails() {
-
     }
 
     public void addItemToCart(Customer customer, Product product){
@@ -270,7 +301,7 @@ public class Repository {
 
     public List<OutOfStockItem> getProductsOutOfStock(List<Product> products){
         List<OutOfStockItem> outOfStock = new ArrayList<>();
-        String query = "SELECT * FROM OutOfStock";
+        String query = "SELECT * FROM OutOfStock ";
 
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
@@ -317,4 +348,43 @@ public class Repository {
 //        } else {
 //            System.out.println("Invalid username or password");
 //        }
+//    }
+
+//    public List<Item> getOrderDetails(int orderId, List<Product> productsInShop) {
+//        List<Item> orderedItems = new ArrayList<>();
+//
+//       String query = "SELECT OrderedProduct.orderId, OrderedProduct.productId, OrderedProduct.quantity, " +
+//               "Customer.id, Product.productName " +
+//               "FROM OrderedProduct " +
+//               "INNER JOIN CustomerOrder ON CustomerOrder.id = OrderedProduct.orderId " +
+//               "INNER JOIN Customer ON Customer.id = CustomerOrder.customerId " +
+//               "INNER JOIN Product ON Product.id = OrderedProduct.productId " +
+//               "WHERE OrderedProduct.orderId = ? ";
+//
+//        try (Connection connection = DriverManager.getConnection(
+//                properties.getProperty("connectionString"),
+//                properties.getProperty("username"),
+//                properties.getProperty("password"))) {
+//
+//            PreparedStatement statement = connection.prepareStatement(query);
+//            statement.setInt(1, orderId);
+//            ResultSet resultSet = statement.executeQuery();
+//
+//            while (resultSet.next()) {
+//                orderId = resultSet.getInt("orderId");
+//                int productID = resultSet.getInt("productId");
+//                int quantity = resultSet.getInt("quantity");
+//                String productName = resultSet.getString("productName");
+//                for(Product product:productsInShop){
+//                    if(product.getId() == productID){
+//                        Item item = new Item(product, quantity);
+//                        orderedItems.add(item);
+//                    }
+//                }
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return orderedItems;
 //    }

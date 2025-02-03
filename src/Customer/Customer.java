@@ -2,6 +2,8 @@ package Customer;
 
 import ShoeShop.Order;
 import ShoeShop.ShoppingCart;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Customer {
 
@@ -11,7 +13,8 @@ public class Customer {
     private long sscr;
     LoginDetails loginDetails;
     ShoppingCart shoppingCart;
-    Order orderHistory;
+    // Order orderHistory;
+    List<Order> orderHistory;
 
     public Customer(int id, String firstName, String lastName, long sscr, LoginDetails loginDetails) {
         this.id = id;
@@ -20,7 +23,7 @@ public class Customer {
         this.sscr = sscr;
         this.loginDetails = loginDetails;
         shoppingCart = new ShoppingCart();
-        orderHistory = new Order();
+        orderHistory = new ArrayList<>();
     }
 
     public int getId() {
@@ -67,6 +70,12 @@ public class Customer {
         this.shoppingCart = shoppingCart;
     }
 
-    public Order getOrderHistory() { return orderHistory;}
+    public List<Order> getOrderHistory() {
+        return orderHistory;
+    }
+
+    public void setOrderHistory(List<Order> orderHistory) {
+        this.orderHistory = orderHistory;
+    }
 
 }
