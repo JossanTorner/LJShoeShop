@@ -4,6 +4,7 @@ import Customer.Customer;
 import Repository.Repository;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -44,7 +45,7 @@ public class ConsoleApp {
     }
 
     public void menuPrompt() {
-        System.out.println("WELCOME TO LJ SHOES!");
+        System.out.println("\nWELCOME TO LJ SHOES!");
         System.out.println(
                 "[1] Shop" +
                         "\n[2] Order history" +
@@ -140,6 +141,7 @@ public class ConsoleApp {
     }
 
     public void showShoppingCart() {
+        updateStore();
         loggedInCustomer.setShoppingCart(repository.getShoppingCart(loggedInCustomer));
         loggedInCustomer.getShoppingCart().setItemsInCart(repository.loadShoppingCart(loggedInCustomer.getShoppingCart(), LJProducts));
         System.out.println("--YOUR SHOPPING CART--");
@@ -150,32 +152,32 @@ public class ConsoleApp {
                 System.out.println(item.getProduct().getProductName() + " - qty: " + item.getQuantity());
             }
         }
-        System.out.println("[1] Make order" + "\n[2] Back to menu");
+        System.out.println("[1] Make order" + "\n[2] Clear shopping cart" + "\n[3] Back to menu");
         System.out.print("-> ");
 
         String choice = input.nextLine();
         switch (choice) {
-            case "1" -> placeOrder(); // Call method to place the order
-            case "2" -> currentState = UserState.MAIN_MENU; // Return to the main menu
+            case "1" -> placeOrder();
+            case "2" -> repository.ClearShoppingCart(loggedInCustomer);
+            case "3" -> currentState = UserState.MAIN_MENU;
             default -> System.out.println("Invalid choice. Returning to menu.");
         }
 
     }
 
     public void placeOrder() {
-        boolean validOrder = true;
+        updateStore();
+        repository.placeOrder(loggedInCustomer.getShoppingCart(), loggedInCustomer);
+        System.out.println("Adjust quantity for following product(s): ");
         for(Item item : loggedInCustomer.getShoppingCart().getItemsInCart()) {
-           for(OutOfStockItem soldOutProduct :outOfStock){
-               if(item.getProduct().getId() == soldOutProduct.getProduct().getId()){
-                   System.out.println("Sold out product: " + item.getProduct().getProductName());
-                   validOrder = false;
-               }
-           }
-       }
-       if(validOrder){
-           repository.placeOrder(loggedInCustomer.getShoppingCart(), loggedInCustomer);
-           System.out.println("Order placed!");
-       }
+            for (Product product : LJProducts){
+                if(item.getProduct().getId() == product.getId()){
+                    if (product.getStockQuantity() < item.getQuantity()){
+                        System.out.println(item.getProduct().getProductName());
+                    }
+                }
+            }
+        }
     }
 
     //denna method behöver anropa SP
@@ -227,11 +229,16 @@ public class ConsoleApp {
         }
     }
 
-    public void updateStore() throws IOException {
-        LJcategories = repository.getCategories();
-        LJProducts = repository.getProducts();
-        repository.putProductsInCategories(LJcategories, LJProducts);
-        outOfStock = repository.getProductsOutOfStock(LJProducts);
+    public void updateStore(){
+        try{
+            LJcategories = repository.getCategories();
+            LJProducts = repository.getProducts();
+            repository.putProductsInCategories(LJcategories, LJProducts);
+            outOfStock = repository.getProductsOutOfStock(LJProducts);
+        }
+        catch (Exception e) {
+           e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) throws IOException {

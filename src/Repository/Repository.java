@@ -87,9 +87,10 @@ public class Repository {
     public List<Product> getProducts() {
         List<Product> products = new ArrayList<>();
 
-        String query = "SELECT Product.id as productId, Product.productName, Specification.price, Specification.shoeSize, Specification.color, Specification.brand " +
+        String query = "SELECT Product.id as productId, Product.productName, Specification.price, Specification.shoeSize, Specification.color, Specification.brand, Inventory.quantity " +
                 "from Product " +
-                "inner join Specification on Specification.id = Product.specId ";
+                "inner join Specification on Specification.id = Product.specId " +
+                "inner join Inventory on Inventory.productId = Product.id ";
 
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
@@ -106,7 +107,8 @@ public class Repository {
                 int shoeSize = resultSet.getInt("shoeSize");
                 String color = resultSet.getString("color");
                 String brand = resultSet.getString("brand");
-                Product product = new Product(productId, productName, new Specification(price, shoeSize, color, brand));
+                int quantity = resultSet.getInt("quantity");
+                Product product = new Product(productId, productName, quantity, (new Specification(price, shoeSize, color, brand)));
                 products.add(product);
             }
 
@@ -176,6 +178,22 @@ public class Repository {
         }
 
         return items;
+    }
+
+    public void ClearShoppingCart(Customer customer){
+
+        try (Connection connection = DriverManager.getConnection(
+                properties.getProperty("connectionString"),
+                properties.getProperty("username"),
+                properties.getProperty("password"));
+             CallableStatement callState = connection.prepareCall("CALL ClearShoppingCart(?)")) {
+
+            callState.setInt(1, customer.getShoppingCart().getId());
+            callState.execute();
+
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
     }
 
     //hämtar shoppingcart tillhörande customer
