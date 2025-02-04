@@ -13,7 +13,6 @@ public class Customer {
     private long sscr;
     LoginDetails loginDetails;
     ShoppingCart shoppingCart;
-    // Order orderHistory;
     List<Order> orderHistory;
 
     public Customer(int id, String firstName, String lastName, long sscr, LoginDetails loginDetails) {

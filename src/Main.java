@@ -17,19 +17,3 @@ public class Main {
 
         }
     }
-
-
-// LJShoeShop shop;
-//Customer loggedIn;
-//
-//    public Main() throws IOException {
-////        LJShoeShop shop = new LJShoeShop();
-////    }
-//
-////    public String userPrompt(String prompt){
-////        Scanner in = new Scanner(System.in);
-////        System.out.println(prompt);
-////        System.out.print("> ");
-////        return in.nextLine();
-////    }
-

@@ -202,7 +202,7 @@ public class Repository {
         }
         return shoppingCart;
     }
-
+        // Hämta orderhistorik för inloggad kund, retuneras som en lista.
     public List<Order> getOrderHistory(Customer loggedInCustomer) {
         List<Order> orderHistory = new ArrayList<>();
         String query = "SELECT CustomerOrder.id, CustomerOrder.dateOfOrder " +
@@ -235,7 +235,7 @@ public class Repository {
         }
         return orderHistory;
     }
-
+        //Hämtar alla produkter från tidigare ordrar och kollas ihop med rätt order baserat på orderId. Retuneras som lista.
     public void loadOrders(Customer customer, List<Product> productsInShop) {
         String query = "SELECT OrderedProduct.orderId, OrderedProduct.productId, OrderedProduct.quantity " +
                 "FROM OrderedProduct " +
@@ -271,7 +271,7 @@ public class Repository {
             e.printStackTrace();
         }
     }
-
+            //Anropar SP addToCart för att lägga till varor i varukorgen som sparas i databasen.
     public void addItemToCart(Customer customer, Product product) {
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
@@ -292,7 +292,7 @@ public class Repository {
             throw new RuntimeException(e);
         }
     }
-
+            // Hämtar alla produkter som ligger i OutOfStock tablell, returnerar lista.
     public List<OutOfStockItem> getProductsOutOfStock(List<Product> products) {
         List<OutOfStockItem> outOfStock = new ArrayList<>();
         String query = "SELECT * FROM OutOfStock ";
@@ -321,7 +321,7 @@ public class Repository {
         }
         return outOfStock;
     }
-
+                //Anropar SP PlaceOrder för att lägga en order, läggs även till i databasen.
     public void placeOrder(ShoppingCart shoppingCart, Customer customer) {
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
