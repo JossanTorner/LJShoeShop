@@ -167,17 +167,29 @@ public class ConsoleApp {
 
     public void placeOrder() {
         updateStore();
+        int orders = loggedInCustomer.getOrderHistory().size();
         repository.placeOrder(loggedInCustomer.getShoppingCart(), loggedInCustomer);
-        System.out.println("Adjust quantity for following product(s): ");
-        for(Item item : loggedInCustomer.getShoppingCart().getItemsInCart()) {
-            for (Product product : LJProducts){
-                if(item.getProduct().getId() == product.getId()){
-                    if (product.getStockQuantity() < item.getQuantity()){
-                        System.out.println(item.getProduct().getProductName());
+        updateCustomerInfo();
+        int currentOrders = loggedInCustomer.getOrderHistory().size();
+        if (currentOrders > orders){
+            System.out.println("Order successful!");
+        }
+        else{
+            for(Item item : loggedInCustomer.getShoppingCart().getItemsInCart()) {
+                for (Product product : LJProducts){
+                    if(item.getProduct().getId() == product.getId()){
+                        if (product.getStockQuantity() < item.getQuantity()){
+                            System.out.println("Adjust quantity for following product: " + item.getProduct().getProductName());
+                        }
                     }
                 }
             }
         }
+    }
+
+    public void updateCustomerInfo(){
+        loggedInCustomer.setOrderHistory(repository.getOrderHistory(loggedInCustomer));
+        repository.loadOrders(loggedInCustomer, LJProducts);
     }
 
     //denna method behöver anropa SP
@@ -209,23 +221,19 @@ public class ConsoleApp {
 
     public void orderHistory() {
         System.out.println(this.loggedInCustomer.getFirstName() + " " + this.loggedInCustomer.getLastName() + " ORDER HISTORY: ");
-        loggedInCustomer.setOrderHistory(repository.getOrderHistory(loggedInCustomer));
+        updateCustomerInfo();
         for (Order order : loggedInCustomer.getOrderHistory()) {
-            System.out.println("Ordernumber: " + " " + order.getCustomerOrderID() + " " + "Ordered: " + " " + order.getOrderDate());
-            OrderedDetails();
+            System.out.println("\nOrdernumber: " + " " + order.getCustomerOrderID() + " " + "Ordered: " + " " + order.getOrderDate());
+            OrderedDetails(order);
         }
         if (loggedInCustomer.getOrderHistory() == null || loggedInCustomer.getOrderHistory().isEmpty()) {
             System.out.println("No order history found for this customer.");
         }
     }
 
-    public void OrderedDetails() {
-        repository.loadOrders(loggedInCustomer, LJProducts);
-        for(Order order : loggedInCustomer.getOrderHistory()) {
-            System.out.println("\nOrder ID: " + order.getCustomerOrderID());
-            for(Item item : order.getProducts()){
-                System.out.println("Product: " + item.getProduct().getProductName() + " qty: " + item.getQuantity());
-            }
+    public void OrderedDetails(Order order) {
+        for(Item item : order.getProducts()){
+            System.out.println("Product: " + item.getProduct().getProductName() + " qty: " + item.getQuantity());
         }
     }
 
