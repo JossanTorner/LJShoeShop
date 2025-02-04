@@ -149,8 +149,7 @@ public class Repository {
     //laddar en shoppingcart med produkter som ligger i den i databasen
     public List<Item> loadShoppingCart(ShoppingCart cart, List<Product> products) {
         List<Item> items = new ArrayList<>();
-        String query = "SELECT CartItem.productId, cartItem.quantity FROM CartItem where CartItem.cartId = ?";
-
+        String query = "SELECT CartItem.productId, CartItem.quantity FROM CartItem where CartItem.cartId = ? ";
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
                 properties.getProperty("username"),
@@ -173,7 +172,7 @@ public class Repository {
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
         return items;
@@ -182,7 +181,7 @@ public class Repository {
     //hämtar shoppingcart tillhörande customer
     public ShoppingCart getShoppingCart(Customer customer) {
         ShoppingCart shoppingCart = new ShoppingCart();
-        String query = "SELECT * FROM ShoppingCart WHERE ShoppingCart.customerId = ?";
+        String query = "SELECT * FROM ShoppingCart WHERE ShoppingCart.customerId = ? ";
 
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),
@@ -336,7 +335,6 @@ public class Repository {
         catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-
     }
 }
 
