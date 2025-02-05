@@ -297,11 +297,8 @@ public class Repository {
 
 
             callState.setInt(1, customer.getId());
-            System.out.println("Customer id: " + customer.getId());
             callState.setInt(2, customer.getShoppingCart().getId());
-            System.out.println("Customer shoppingcart Id " + customer.getShoppingCart().getId());
             callState.setInt(3, product.getId());
-            System.out.println("Product id: " + product.getId());
             callState.execute();
 
         } catch (SQLException e) {

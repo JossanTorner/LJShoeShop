@@ -124,16 +124,13 @@ public class ConsoleApp {
                 throw new RuntimeException(e);
             }
 
-            for (int i = 0; i < chosenCategory.getProductsInCategory().size(); i++) {
-                if (choice > 0 && choice <= chosenCategory.getProductsInCategory().size()) {
-                    selectedProduct = chosenCategory.getProductsInCategory().get(choice - 1);
-                    System.out.println("Selected product: " + selectedProduct.getProductName());
-                    break;
-                }
-            }
-
-            if (selectedProduct != null) {
+            if(choice>0&& choice <= chosenCategory.getProductsInCategory().size()) {
+                selectedProduct = chosenCategory.getProductsInCategory().get(choice - 1);
+                System.out.println("Selected product: " + selectedProduct.getProductName());
                 addProductToCart(selectedProduct);
+            }
+            else{
+                System.out.println("Invalid choice. Returning to menu");
             }
         } else {
             System.out.println("No products found");
