@@ -2,9 +2,7 @@ package ShoeShop;
 
 import Customer.Customer;
 import Repository.Repository;
-
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -35,6 +33,32 @@ public class ConsoleApp {
         }
     }
 
+    public void updateStore() {
+        try {
+            LJcategories = repository.getCategories();
+            LJProducts = repository.getProducts();
+            repository.putProductsInCategories(LJcategories, LJProducts);
+            outOfStock = repository.getProductsOutOfStock(LJProducts);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateCustomerInfo() {
+        loggedInCustomer.setOrderHistory(repository.getOrderHistory(loggedInCustomer));
+        repository.loadOrders(loggedInCustomer, LJProducts);
+    }
+
+    public void validateLogIn(String username, String password) {
+        loggedInCustomer = repository.login(username, password);
+        if (loggedInCustomer == null) {
+            System.out.println("Invalid username or password");
+        } else {
+            currentState = UserState.MAIN_MENU;
+            loggedInCustomer.setShoppingCart(repository.getShoppingCart(loggedInCustomer));
+        }
+    }
+
     public void logInPrompt() {
         System.out.println("LOG IN");
         System.out.print("Username:\n-> ");
@@ -62,7 +86,6 @@ public class ConsoleApp {
             }
             case "2" -> {
                 orderHistory();
-
             }
             case "3" -> {
                 showShoppingCart();
@@ -104,8 +127,6 @@ public class ConsoleApp {
     }
 
     public void handleCategoryChoice(Category chosenCategory) {
-        Product selectedProduct = null;
-        int choice;
         if (!chosenCategory.getProductsInCategory().isEmpty()) {
             for (int i = 0; i < chosenCategory.getProductsInCategory().size(); i++) {
                 Product product = chosenCategory.getProductsInCategory().get(i);
@@ -116,24 +137,45 @@ public class ConsoleApp {
                         "\nPrice: " + product.getSpec().getPrice());
                 System.out.println();
             }
+            handleProductChoice(chosenCategory);
 
-            System.out.print("-> ");
-            try {
-                choice = Integer.parseInt(input.nextLine());
-            } catch (NumberFormatException e) {
-                throw new RuntimeException(e);
-            }
-
-            if(choice>0&& choice <= chosenCategory.getProductsInCategory().size()) {
-                selectedProduct = chosenCategory.getProductsInCategory().get(choice - 1);
-                System.out.println("Selected product: " + selectedProduct.getProductName());
-                addProductToCart(selectedProduct);
-            }
-            else{
-                System.out.println("Invalid choice. Returning to menu");
-            }
         } else {
             System.out.println("No products found");
+        }
+    }
+
+    public void handleProductChoice(Category chosenCategory) {
+        int choice;
+
+        System.out.print("-> ");
+        try {
+            choice = Integer.parseInt(input.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid product choice");
+            return;
+        }
+
+        if (choice > 0 && choice <= chosenCategory.getProductsInCategory().size()) {
+            Product selectedProduct = chosenCategory.getProductsInCategory().get(choice - 1);
+            System.out.println("Selected product: " + selectedProduct.getProductName());
+            addProductToCart(selectedProduct);
+        } else {
+            System.out.println("Invalid choice. Returning to menu");
+        }
+    }
+
+
+    public void addProductToCart(Product product) {
+        boolean soldOut = false;
+        for (OutOfStockItem item : outOfStock) {
+            if (item.getProduct().getId() == product.getId()) {
+                System.out.println("Product is out of stock since " + item.getOutOfStockSince());
+                soldOut = true;
+                break;
+            }
+        }
+        if (!soldOut) {
+            repository.addItemToCart(loggedInCustomer, product);
         }
     }
 
@@ -164,56 +206,52 @@ public class ConsoleApp {
 
     public void placeOrder() {
         updateStore();
-        int orders = loggedInCustomer.getOrderHistory().size();
-        repository.placeOrder(loggedInCustomer.getShoppingCart(), loggedInCustomer);
         updateCustomerInfo();
-        int currentOrders = loggedInCustomer.getOrderHistory().size();
-        if (currentOrders > orders){
+        int orderCountBefore = getOrderCount();
+        processOrder();
+        if (hasOrderSucceeded(orderCountBefore)) {
             System.out.println("Order successful!");
         }
-        else{
-            for(Item item : loggedInCustomer.getShoppingCart().getItemsInCart()) {
-                for (Product product : LJProducts){
-                    if(item.getProduct().getId() == product.getId()){
-                        if (product.getStockQuantity() < item.getQuantity()){
-                            System.out.println("Adjust quantity for following product: " + item.getProduct().getProductName());
-                        }
-                    }
-                }
+        else {
+            handleFailedOrder();
+        }
+    }
+
+    private void processOrder(){
+        repository.placeOrder(loggedInCustomer.getShoppingCart(), loggedInCustomer);
+        updateCustomerInfo();
+    }
+
+    private int getOrderCount(){
+        return loggedInCustomer.getOrderHistory().size();
+    }
+
+
+    private boolean hasOrderSucceeded(int ordersBefore) {
+        return getOrderCount() > ordersBefore;
+    }
+
+    private void handleFailedOrder(){
+        for(Item item : loggedInCustomer.getShoppingCart().getItemsInCart()) {
+            checkAvailability(item);
+        }
+    }
+
+    public void checkAvailability(Item item){
+        Product product = findProductById(item.getProduct().getId());
+        if(product != null && product.getStockQuantity() < item.getQuantity()) {
+            System.out.println("Adjust quantity for following product: " + item.getProduct().getProductName());
+        }
+    }
+
+    public Product findProductById(int id){
+        for(Product product : LJProducts){
+            if (product.getId() == id){
+                return product;
             }
         }
+        return null;
     }
-
-    public void updateCustomerInfo(){
-        loggedInCustomer.setOrderHistory(repository.getOrderHistory(loggedInCustomer));
-        repository.loadOrders(loggedInCustomer, LJProducts);
-    }
-
-    //denna method behöver anropa SP
-    public void addProductToCart(Product product) {
-        boolean soldOut = false;
-        for (OutOfStockItem item : outOfStock) {
-            if (item.getProduct().getId() == product.getId()) {
-                System.out.println("Product is out of stock!");
-                soldOut = true;
-                break;
-            }
-        }
-        if (!soldOut) {
-            repository.addItemToCart(loggedInCustomer, product);
-        }
-    }
-
-    public void validateLogIn(String username, String password) {
-        loggedInCustomer = repository.login(username, password);
-        if (loggedInCustomer == null) {
-            System.out.println("Invalid username or password");
-        } else {
-            currentState = UserState.MAIN_MENU;
-            loggedInCustomer.setShoppingCart(repository.getShoppingCart(loggedInCustomer));
-        }
-    }
-
 
     public void orderHistory() {
         System.out.println(this.loggedInCustomer.getFirstName() + " " + this.loggedInCustomer.getLastName() + " ORDER HISTORY: ");
@@ -231,22 +269,5 @@ public class ConsoleApp {
         for(Item item : order.getProducts()){
             System.out.println("Product: " + item.getProduct().getProductName() + " qty: " + item.getQuantity());
         }
-    }
-
-    public void updateStore(){
-        try{
-            LJcategories = repository.getCategories();
-            LJProducts = repository.getProducts();
-            repository.putProductsInCategories(LJcategories, LJProducts);
-            outOfStock = repository.getProductsOutOfStock(LJProducts);
-        }
-        catch (Exception e) {
-           e.printStackTrace();
-        }
-    }
-
-    public static void main(String[] args) throws IOException {
-        ConsoleApp app = new ConsoleApp();
-        app.run();
     }
 }

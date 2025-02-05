@@ -2,10 +2,10 @@ package ShoeShop;
 
 public class Specification {
 
-    double price;
-    int size;
-    String color;
-    String brand;
+    private final double price;
+    private final int size;
+    private final String color;
+    private final String brand;
 
     public Specification(double price, int size, String color, String brand) {
         this.price = price;
@@ -18,31 +18,15 @@ public class Specification {
         return price;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
     public int getSize() {
         return size;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
     }
 
     public String getColor() {
         return color;
     }
 
-    public void setColor(String color) {
-        this.color = color;
-    }
-
     public String getBrand() {
         return brand;
-    }
-
-    public void setBrand(String brand) {
-        this.brand = brand;
     }
 }

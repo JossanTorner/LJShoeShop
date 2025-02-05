@@ -5,19 +5,11 @@ import java.util.List;
 
 public class ShoppingCart {
 
-    int id;
-    List<Item> cartItemList;
+    private int id;
+    private List<Item> cartItemList;
 
     public ShoppingCart() {
         this.cartItemList = new ArrayList<Item>();
-    }
-
-    public void addToCart(Item cartItem) {
-        this.cartItemList.add(cartItem);
-    }
-
-    public void removeFromCart(Item cartItem) {
-        this.cartItemList.remove(cartItem);
     }
 
     public List<Item> getItemsInCart() {

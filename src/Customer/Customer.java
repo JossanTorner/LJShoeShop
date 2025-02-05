@@ -7,13 +7,13 @@ import java.util.List;
 
 public class Customer {
 
-    private int id;
-    private String firstName;
-    private String lastName;
-    private long sscr;
-    LoginDetails loginDetails;
-    ShoppingCart shoppingCart;
-    List<Order> orderHistory;
+    private final int id;
+    private final String firstName;
+    private final String lastName;
+    private final long sscr;
+    private LoginDetails loginDetails;
+    private ShoppingCart shoppingCart;
+    private List<Order> orderHistory;
 
     public Customer(int id, String firstName, String lastName, long sscr, LoginDetails loginDetails) {
         this.id = id;
@@ -29,36 +29,12 @@ public class Customer {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public String getFirstName() {
         return firstName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
     public String getLastName() {
         return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public long getSscr() {
-        return sscr;
-    }
-
-    public void setSscr(long sscr) {
-        this.sscr = sscr;
-    }
-
-    public LoginDetails getLoginDetails() {
-        return loginDetails;
     }
 
     public ShoppingCart getShoppingCart() {

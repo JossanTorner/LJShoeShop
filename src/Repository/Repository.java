@@ -49,7 +49,8 @@ public class Repository {
             }
             return null;
 
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Invalid connection to database while logging in", e);
         }
@@ -74,7 +75,8 @@ public class Repository {
                 Category category = new Category(categoryName, id);
                 categories.add(category);
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Invalid connection to database while collection categories", e);
         }
@@ -111,7 +113,8 @@ public class Repository {
                 products.add(product);
             }
 
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Databasfel vid inläsning av produkter", e);
         }
@@ -142,7 +145,8 @@ public class Repository {
                 }
             }
 
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
@@ -172,7 +176,8 @@ public class Repository {
                     }
                 }
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -190,7 +195,8 @@ public class Repository {
             callState.setInt(1, customer.getShoppingCart().getId());
             callState.execute();
 
-        } catch (SQLException e){
+        }
+        catch (SQLException e){
             e.printStackTrace();
         }
     }
@@ -213,7 +219,8 @@ public class Repository {
                 int shoppingCartId = resultSet.getInt("id");
                 shoppingCart.setId(shoppingCartId);
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return shoppingCart;
@@ -241,7 +248,8 @@ public class Repository {
                 orderHistory.add(collectedOrder);
             }
 
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             e.printStackTrace();
             System.out.println("Error while getting order history");
         }
@@ -283,7 +291,8 @@ public class Repository {
                     }
                 }
             }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             e.printStackTrace();
         }
     }
@@ -295,17 +304,17 @@ public class Repository {
                 properties.getProperty("password"));
         CallableStatement callState = connection.prepareCall("CALL AddToCart(?, ?, ?)")) {
 
-
             callState.setInt(1, customer.getId());
             callState.setInt(2, customer.getShoppingCart().getId());
             callState.setInt(3, product.getId());
             callState.execute();
 
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
-            // Hämtar alla produkter som ligger i OutOfStock tablell, returnerar lista.
+
     public List<OutOfStockItem> getProductsOutOfStock(List<Product> products) {
         List<OutOfStockItem> outOfStock = new ArrayList<>();
         String query = "SELECT * FROM OutOfStock ";
@@ -329,12 +338,14 @@ public class Repository {
                 }
             }
 
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return outOfStock;
     }
-                //Anropar SP PlaceOrder för att lägga en order, läggs även till i databasen.
+
+    //Anropar SP PlaceOrder för att lägga en order, läggs även till i databasen.
     public void placeOrder(ShoppingCart shoppingCart, Customer customer) {
         try (Connection connection = DriverManager.getConnection(
                 properties.getProperty("connectionString"),

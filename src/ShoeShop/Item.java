@@ -2,8 +2,8 @@ package ShoeShop;
 
 public class Item {
 
-    Product product;
-    int quantity = 1;
+    private final Product product;
+    private int quantity = 1;
 
     public Item(Product product) {
         this.product = product;
@@ -18,10 +18,6 @@ public class Item {
         return product;
     }
 
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
     public int getQuantity() {
         return quantity;
     }
@@ -30,7 +26,4 @@ public class Item {
         this.quantity = quantity;
     }
 
-    public void addToQuantity() {
-        quantity++;
-    }
 }

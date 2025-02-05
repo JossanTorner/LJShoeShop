@@ -18,28 +18,12 @@ public class Product {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public String getProductName() {
         return productName;
     }
 
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
-
     public Specification getSpec() {
         return spec;
-    }
-
-    public void setSpec(Specification spec) {
-        this.spec = spec;
-    }
-
-    public void setStockQuantity(int stockQuantity) {
-        this.stockQuantity = stockQuantity;
     }
 
     public int getStockQuantity(){

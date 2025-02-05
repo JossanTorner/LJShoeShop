@@ -1,16 +1,12 @@
 package ShoeShop;
 
-import Customer.Customer;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class Order {
-    private int customerOrderID;
-    private String orderDate;
-    private List <Item> products;
-
-    public Order(){}
+    private final int customerOrderID;
+    private final String orderDate;
+    private final List <Item> products;
 
     public Order(int customerOrderID, String dateOfOrder) {
         this.customerOrderID = customerOrderID;
@@ -22,16 +18,8 @@ public class Order {
         return customerOrderID;
     }
 
-    public void setCustomerOrderID(int customerOrderID) {
-        this.customerOrderID = customerOrderID;
-    }
-
     public String getOrderDate() {
         return orderDate;
-    }
-
-    public void setOrderDate(String orderDate) {
-        this.orderDate = orderDate;
     }
 
     public List<Item> getProducts() { return products; }
