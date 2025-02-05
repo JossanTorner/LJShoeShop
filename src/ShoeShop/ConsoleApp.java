@@ -3,29 +3,20 @@ package ShoeShop;
 import Customer.Customer;
 import Repository.Repository;
 import java.io.IOException;
-import java.util.List;
 import java.util.Scanner;
 
 public class ConsoleApp {
 
-    Repository repository;
-    List<Category> LJcategories;
-    List<Product> LJProducts;
-    List<OutOfStockItem> outOfStock;
     Scanner input = new Scanner(System.in);
-   // LJShoeShop shop;
+    LJShoeShop shop;
 
     boolean running = true;
     UserState currentState = UserState.LOGIN;
     Customer loggedInCustomer = null;
 
-
     public ConsoleApp() throws IOException {
-//        shop = new LJShoeShop();
-//        shop.updateStore();
-        repository = new Repository();
-        updateStore();
-
+        shop = new LJShoeShop();
+        shop.updateStore();
     }
 
     public void run() {
@@ -37,29 +28,19 @@ public class ConsoleApp {
         }
     }
 
-    public void updateStore() {
-        try {
-            LJcategories = repository.getCategories();
-            LJProducts = repository.getProducts();
-            repository.putProductsInCategories(LJcategories, LJProducts);
-            outOfStock = repository.getProductsOutOfStock(LJProducts);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void updateCustomerInfo() {
-        loggedInCustomer.setOrderHistory(repository.getOrderHistory(loggedInCustomer));
-        repository.loadOrders(loggedInCustomer, LJProducts);
-    }
-
     public void validateLogIn(String username, String password) {
-        loggedInCustomer = repository.login(username, password);
-        if (loggedInCustomer == null) {
-            System.out.println("Invalid username or password");
-        } else {
-            currentState = UserState.MAIN_MENU;
-            loggedInCustomer.setShoppingCart(repository.getShoppingCart(loggedInCustomer));
+        try {
+            Repository repository = new Repository();
+            loggedInCustomer = repository.login(username, password);
+            if (loggedInCustomer == null) {
+                System.out.println("Invalid username or password");
+            } else {
+                currentState = UserState.MAIN_MENU;
+                loggedInCustomer.setShoppingCart(repository.getShoppingCart(loggedInCustomer));
+            }
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -89,7 +70,7 @@ public class ConsoleApp {
                 categoriesPrompt();
             }
             case "2" -> {
-                orderHistory();
+                shop.orderHistory(loggedInCustomer);
             }
             case "3" -> {
                 showShoppingCart();
@@ -136,9 +117,9 @@ public class ConsoleApp {
     }
 
     public Category getCategoryChoice(int choice){
-        for (int i = 0; i < LJcategories.size(); i++) {
-            if (choice > 0 && choice <= LJcategories.size()) {
-                return LJcategories.get(choice - 1);
+        for (int i = 0; i < shop.LJcategories.size(); i++) {
+            if (choice > 0 && choice <= shop.LJcategories.size()) {
+                return shop.LJcategories.get(choice - 1);
             }
         }
         return null;
@@ -146,7 +127,7 @@ public class ConsoleApp {
 
     public void getCategoryNames(){
         int count = 1;
-        for (Category lJcategory : LJcategories) {
+        for (Category lJcategory : shop.LJcategories) {
             System.out.println("[" + (count++) + "] " + lJcategory.getCategoryName());
         }
     }
@@ -177,37 +158,15 @@ public class ConsoleApp {
         if (productChoice > 0 && productChoice <= chosenCategory.getProductsInCategory().size()) {
             Product selectedProduct = chosenCategory.getProductsInCategory().get(productChoice - 1);
             System.out.println("Selected product: " + selectedProduct.getProductName());
-             addProductToCart(selectedProduct);
+             shop.addProductToCart(selectedProduct, loggedInCustomer);
         } else {
             System.out.println("Invalid choice. Returning to menu");
         }
     }
 
-    public void addProductToCart(Product product) {
-        OutOfStockItem outOfStockItem = findOutOfStockItem(product);
-        if (outOfStockItem != null) {
-            handleOutOfStockItems(outOfStockItem);
-        } else {
-            repository.addItemToCart(loggedInCustomer, product);
-        }
-    }
-
-    public OutOfStockItem findOutOfStockItem(Product product) {
-        for (OutOfStockItem item : outOfStock) {
-            if (item.getProduct().getId() == product.getId()) {
-                return item;
-            }
-        }
-        return null;
-    }
-
-    public void handleOutOfStockItems(OutOfStockItem item) {
-        System.out.println("Product is out of stock since " + item.getOutOfStockSince());
-    }
-
     public void showShoppingCart() {
         System.out.println("--YOUR SHOPPING CART--");
-        loadShoppingCartItems();
+        shop.loadShoppingCartItems(loggedInCustomer);
         if (loggedInCustomer.getShoppingCart().getItemsInCart().isEmpty()) {
             System.out.println("Your shopping cart is empty!");
         } else {
@@ -215,21 +174,12 @@ public class ConsoleApp {
         }
     }
 
-
-    public void loadShoppingCartItems() {
-        updateStore();
-        loggedInCustomer.setShoppingCart(repository.getShoppingCart(loggedInCustomer));
-        loggedInCustomer.getShoppingCart().setItemsInCart(repository.loadShoppingCart(loggedInCustomer.getShoppingCart(), LJProducts));
-    }
-
-
      public void showCartItems(){
          for (Item item : loggedInCustomer.getShoppingCart().getItemsInCart()) {
              System.out.println(item.getProduct().getProductName() + " - qty: " + item.getQuantity());
          }
          shoppingCartMenu();
      }
-
 
     public void shoppingCartMenu(){
         System.out.println("[1] Make order" + "\n[2] Clear shopping cart" + "\n[3] Back to menu");
@@ -239,77 +189,11 @@ public class ConsoleApp {
 
     public void handleShoppingCartInput(String choice){
         switch (choice) {
-            case "1" -> placeOrder();
-            case "2" -> repository.ClearShoppingCart(loggedInCustomer);
+            case "1" -> shop.placeOrder(loggedInCustomer);
+            case "2" -> shop.clearShoppingcart(loggedInCustomer);
             case "3" -> currentState = UserState.MAIN_MENU;
             default -> System.out.println("Invalid choice. Returning to menu.");
         }
     }
 
-    public void placeOrder() {
-        updateStore();
-        updateCustomerInfo();
-        int orderCountBefore = getOrderCount();
-        processOrder();
-        if (hasOrderSucceeded(orderCountBefore)) {
-            System.out.println("Order successful!");
-        }
-        else {
-            handleFailedOrder();
-        }
-    }
-
-    private void processOrder(){
-        repository.placeOrder(loggedInCustomer.getShoppingCart(), loggedInCustomer);
-        updateCustomerInfo();
-    }
-
-    private int getOrderCount(){
-        return loggedInCustomer.getOrderHistory().size();
-    }
-
-
-    private boolean hasOrderSucceeded(int ordersBefore) {
-        return getOrderCount() > ordersBefore;
-    }
-
-    private void handleFailedOrder(){
-        for(Item item : loggedInCustomer.getShoppingCart().getItemsInCart()) {
-            checkAvailability(item);
-        }
-    }
-
-    public void checkAvailability(Item item){
-        Product product = findProductById(item.getProduct().getId());
-        if(product != null && product.getStockQuantity() < item.getQuantity()) {
-            System.out.println("Adjust quantity for following product: " + item.getProduct().getProductName());
-        }
-    }
-
-    public Product findProductById(int id){
-        for(Product product : LJProducts){
-            if (product.getId() == id){
-                return product;
-            }
-        }
-        return null;
-    }
-
-    public void orderHistory() {
-        System.out.println(this.loggedInCustomer.getFirstName() + " " + this.loggedInCustomer.getLastName() + " ORDER HISTORY: ");
-        updateCustomerInfo();
-        for (Order order : loggedInCustomer.getOrderHistory()) {
-            System.out.println("\nOrdernumber: " + " " + order.getCustomerOrderID() + " " + "Ordered: " + " " + order.getOrderDate());
-            OrderedDetails(order);
-        }
-        if (loggedInCustomer.getOrderHistory() == null || loggedInCustomer.getOrderHistory().isEmpty()) {
-            System.out.println("No order history found for this customer.");
-        }
-    }
-
-    public void OrderedDetails(Order order) {
-        for(Item item : order.getProducts()){
-            System.out.println("Product: " + item.getProduct().getProductName() + " qty: " + item.getQuantity());
-        }
-    }
 }
