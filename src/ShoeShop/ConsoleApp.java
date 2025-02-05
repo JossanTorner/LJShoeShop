@@ -13,6 +13,7 @@ public class ConsoleApp {
     List<Product> LJProducts;
     List<OutOfStockItem> outOfStock;
     Scanner input = new Scanner(System.in);
+   // LJShoeShop shop;
 
     boolean running = true;
     UserState currentState = UserState.LOGIN;
@@ -20,8 +21,11 @@ public class ConsoleApp {
 
 
     public ConsoleApp() throws IOException {
+//        shop = new LJShoeShop();
+//        shop.updateStore();
         repository = new Repository();
         updateStore();
+
     }
 
     public void run() {
@@ -99,53 +103,45 @@ public class ConsoleApp {
             }
         }
     }
-    /// Den tidigare metoden
-//    public void categoriesPrompt() {
-//        Category chosenCategory = null;
-//        int categoryChoice;
-//
-//        System.out.println("Choose a category: ");
-//        int count = 1;
-//        for (int i = 0; i < LJcategories.size(); i++) {
-//            System.out.println("[" + (count++) + "] " + LJcategories.get(i).getCategoryName());
-//        }
-//
-//        System.out.print("-> ");
-//        try {
-//            categoryChoice = Integer.parseInt(input.nextLine());
-//        } catch (Exception e) {
-//            return;
-//        }
-//
-//        for (int i = 0; i < LJcategories.size(); i++) {
-//            if (categoryChoice > 0 && categoryChoice <= LJcategories.size()) {
-//                chosenCategory = LJcategories.get(categoryChoice - 1);
-//                break;
-//            }
-//        }
-//        handleCategoryChoice(chosenCategory);
-//    }
-    public void categoriesPrompt() {
-        Category chosenCategory = null;
-        int categoryChoice;
 
+    public void categoriesPrompt() {
         System.out.println("Choose a category: ");
         getCategoryNames();
 
-        System.out.print("-> ");
-        try {
-            categoryChoice = Integer.parseInt(input.nextLine());
-        } catch (Exception e) {
-            return;
-        }
+        int categoryChoice = takeMenuChoice();
 
+        Category chosenCategory = getCategoryChoice(categoryChoice);
+        validateCategoryChoice(chosenCategory);
+    }
+
+    public int takeMenuChoice(){
+        System.out.println("-> ");
+        int choice = 0;
+        try {
+            choice = Integer.parseInt(input.nextLine());
+        }
+        catch (Exception e) {
+            System.out.println("Invalid choice. Returning to main menu.");
+        }
+        return choice;
+    }
+
+    public void validateCategoryChoice(Category category) {
+        if(category == null) {
+            System.out.println("Invalid category choice. Returning to menu.");
+        }
+        else{
+            handleCategoryChoice(category);
+        }
+    }
+
+    public Category getCategoryChoice(int choice){
         for (int i = 0; i < LJcategories.size(); i++) {
-            if (categoryChoice > 0 && categoryChoice <= LJcategories.size()) {
-                chosenCategory = LJcategories.get(categoryChoice - 1);
-                break;
+            if (choice > 0 && choice <= LJcategories.size()) {
+                return LJcategories.get(choice - 1);
             }
         }
-        handleCategoryChoice(chosenCategory);
+        return null;
     }
 
     public void getCategoryNames(){
@@ -155,31 +151,10 @@ public class ConsoleApp {
         }
     }
 
-/// Den tidigare metoden
-//    public void handleCategoryChoice(Category chosenCategory) {
-//        if (!chosenCategory.getProductsInCategory().isEmpty()) {
-//            for (int i = 0; i < chosenCategory.getProductsInCategory().size(); i++) {
-//                Product product = chosenCategory.getProductsInCategory().get(i);
-//                System.out.println("[" + (i + 1) + "] " + product.getProductName() +
-//                        "\nBrand: " + product.getSpec().getBrand() +
-//                        "\nColor: " + product.getSpec().getColor() +
-//                        "\nSize: " + product.getSpec().getSize() +
-//                        "\nPrice: " + product.getSpec().getPrice());
-//                System.out.println();
-//            }
-//            handleProductChoice(chosenCategory);
-//
-//        } else {
-//            System.out.println("No products found");
-//        }
-//    }
-
-
     public void handleCategoryChoice(Category chosenCategory) {
         if (!chosenCategory.getProductsInCategory().isEmpty()) {
             getProductsForCategory(chosenCategory);
             handleProductChoice(chosenCategory);
-
         } else {
             System.out.println("No products found");
         }
@@ -197,41 +172,16 @@ public class ConsoleApp {
     }
 
     public void handleProductChoice(Category chosenCategory) {
-        int choice;
-        System.out.print("-> ");
-        try {
-            choice = Integer.parseInt(input.nextLine());
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid product choice");
-            return;
-        }
-        if (choice > 0 && choice <= chosenCategory.getProductsInCategory().size()) {
-            Product selectedProduct = chosenCategory.getProductsInCategory().get(choice - 1);
+        int productChoice = takeMenuChoice();
+
+        if (productChoice > 0 && productChoice <= chosenCategory.getProductsInCategory().size()) {
+            Product selectedProduct = chosenCategory.getProductsInCategory().get(productChoice - 1);
             System.out.println("Selected product: " + selectedProduct.getProductName());
              addProductToCart(selectedProduct);
         } else {
             System.out.println("Invalid choice. Returning to menu");
         }
     }
-
-
-
-
-
-//          tidigare metod:
-//    public void addProductToCart(Product product) {
-//        boolean soldOut = false;
-//        for (OutOfStockItem item : outOfStock) {
-//            if (item.getProduct().getId() == product.getId()) {
-//                System.out.println("Product is out of stock since " + item.getOutOfStockSince());
-//                soldOut = true;
-//                break;
-//            }
-//        }
-//        if (!soldOut) {
-//            repository.addItemToCart(loggedInCustomer, product);
-//        }
-//    }
 
     public void addProductToCart(Product product) {
         OutOfStockItem outOfStockItem = findOutOfStockItem(product);
@@ -280,26 +230,11 @@ public class ConsoleApp {
          shoppingCartMenu();
      }
 
-//    Förra metoden
-//
-//    public void shoppingCartMenu() {
-//        System.out.println("[1] Make order" + "\n[2] Clear shopping cart" + "\n[3] Back to menu");
-//        System.out.print("-> ");
-//        String choice = input.nextLine();
-//
-//
-//        String choice = input.nextLine();
-//        switch (choice) {
-//            case "1" -> placeOrder();
-//            case "2" -> repository.ClearShoppingCart(loggedInCustomer);
-//            case "3" -> currentState = UserState.MAIN_MENU;
-//            default -> System.out.println("Invalid choice. Returning to menu.");
-//        }
-//    }
+
     public void shoppingCartMenu(){
         System.out.println("[1] Make order" + "\n[2] Clear shopping cart" + "\n[3] Back to menu");
         System.out.print("-> ");
-        handleShoppingCartInput(input.nextLine()); //går det bra?
+        handleShoppingCartInput(input.nextLine());
     }
 
     public void handleShoppingCartInput(String choice){
