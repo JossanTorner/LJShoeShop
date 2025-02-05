@@ -46,7 +46,6 @@ public class Repository {
                 String userUsername = resultSet.getString("username");
                 String userPassword = resultSet.getString("userPassword");
                 return new Customer(id, firstName, lastName, sscr, new LoginDetails(userUsername, userPassword));
-
             }
             return null;
 

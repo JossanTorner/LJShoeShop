@@ -209,7 +209,6 @@ public class ConsoleApp {
 
     public void validateLogIn(String username, String password) {
         loggedInCustomer = repository.login(username, password);
-        System.out.println("Customer id: " + loggedInCustomer.getId());
         if (loggedInCustomer == null) {
             System.out.println("Invalid username or password");
         } else {
