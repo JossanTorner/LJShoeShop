@@ -1,4 +1,4 @@
-package ShoeShop;
+package App;
 
 public enum UserState {
     LOGIN,

@@ -1,4 +1,6 @@
-package ShoeShop;
+package ShoeShop.Orders;
+
+import ShoeShop.Products.Product;
 
 public class Item {
 

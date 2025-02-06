@@ -1,7 +1,7 @@
 package Customer;
 
-import ShoeShop.Order;
-import ShoeShop.ShoppingCart;
+import ShoeShop.Orders.Order;
+import ShoeShop.Orders.ShoppingCart;
 import java.util.ArrayList;
 import java.util.List;
 

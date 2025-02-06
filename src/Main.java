@@ -1,5 +1,5 @@
 
-import ShoeShop.ConsoleApp;
+import App.ConsoleApp;
 import java.io.IOException;
 
 public class Main {

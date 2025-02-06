@@ -2,8 +2,13 @@ package Repository;
 
 import Customer.Customer;
 import Customer.LoginDetails;
-import ShoeShop.*;
-import ShoeShop.Product;
+import ShoeShop.Orders.Item;
+import ShoeShop.Orders.Order;
+import ShoeShop.Orders.ShoppingCart;
+import ShoeShop.Products.Category;
+import ShoeShop.Products.OutOfStockItem;
+import ShoeShop.Products.Product;
+import ShoeShop.Products.Specification;
 
 import java.io.FileInputStream;
 import java.io.IOException;

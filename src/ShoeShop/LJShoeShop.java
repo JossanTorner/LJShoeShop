@@ -2,16 +2,21 @@ package ShoeShop;
 
 import Customer.Customer;
 import Repository.Repository;
+import ShoeShop.Orders.Item;
+import ShoeShop.Orders.Order;
+import ShoeShop.Products.Category;
+import ShoeShop.Products.OutOfStockItem;
+import ShoeShop.Products.Product;
 
 import java.io.IOException;
 import java.util.List;
 
 public class LJShoeShop {
 
-    List<Category> LJcategories;
-    List<Product> LJProducts;
-    Repository repository;
-    List<OutOfStockItem> outOfStock;
+    private List<Category> LJcategories;
+    private List<Product> LJProducts;
+    private Repository repository;
+    private List<OutOfStockItem> outOfStock;
 
     public LJShoeShop() throws IOException {
         this.repository = new Repository();
@@ -129,5 +134,21 @@ public class LJShoeShop {
 
     public void clearShoppingcart(Customer customer){
         repository.ClearShoppingCart(customer);
+    }
+
+    public List<Category> getLJcategories() {
+        return LJcategories;
+    }
+
+    public List<Product> getLJProducts() {
+        return LJProducts;
+    }
+
+    public Repository getRepository() {
+        return repository;
+    }
+
+    public List<OutOfStockItem> getOutOfStock() {
+        return outOfStock;
     }
 }

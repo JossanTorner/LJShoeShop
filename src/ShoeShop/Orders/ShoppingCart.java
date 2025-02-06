@@ -1,4 +1,4 @@
-package ShoeShop;
+package ShoeShop.Orders;
 
 import java.util.ArrayList;
 import java.util.List;

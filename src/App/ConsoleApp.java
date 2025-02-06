@@ -1,7 +1,12 @@
-package ShoeShop;
+package App;
 
 import Customer.Customer;
 import Repository.Repository;
+import ShoeShop.*;
+import ShoeShop.Orders.Item;
+import ShoeShop.Products.Category;
+import ShoeShop.Products.Product;
+
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -117,9 +122,9 @@ public class ConsoleApp {
     }
 
     public Category getCategoryChoice(int choice){
-        for (int i = 0; i < shop.LJcategories.size(); i++) {
-            if (choice > 0 && choice <= shop.LJcategories.size()) {
-                return shop.LJcategories.get(choice - 1);
+        for (int i = 0; i < shop.getLJcategories().size(); i++) {
+            if (choice > 0 && choice <= shop.getLJcategories().size()) {
+                return shop.getLJcategories().get(choice - 1);
             }
         }
         return null;
@@ -127,7 +132,7 @@ public class ConsoleApp {
 
     public void getCategoryNames(){
         int count = 1;
-        for (Category lJcategory : shop.LJcategories) {
+        for (Category lJcategory : shop.getLJcategories()) {
             System.out.println("[" + (count++) + "] " + lJcategory.getCategoryName());
         }
     }
